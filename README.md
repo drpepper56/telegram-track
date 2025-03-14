@@ -27,4 +27,4 @@ This is a Telegram Mini App designed to help you track your packages. Work is in
 
 [Specify the license, e.g., MIT License]
 
-README file was AI generated
+README file was AI generated. Test2
