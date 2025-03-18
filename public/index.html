@@ -11,6 +11,25 @@
 
 <body>
     <main>
+        
+        <h1>Welcome to Telegram Mini App</h1>
+        <button id="sendData">Send Data to Bot</button>
+        
+    </main>
+    <div id="viewport"></div>
+    <div id="viewport-params-size"></div>
+    <div id="viewport-params-expand"></div>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Expand the app to full screen
+
+        document.getElementById("sendData").addEventListener("click", () => {
+            tg.sendData(JSON.stringify({ message: "Hello from Mini App!" }));
+        });
+
+        {/*
+
+        [
         <h1>Modals</h1>
         <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
         <button onclick="showPopup();">Launch Popup</button>
@@ -30,20 +49,9 @@
 
         <h1>Buttons</h1>
         <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
-        <button onclick="toggleMainButton();">Toggle Main Button</button>
-    </main>
-    <div id="viewport"></div>
-    <div id="viewport-params-size"></div>
-    <div id="viewport-params-expand"></div>
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand(); // Expand the app to full screen
+        <button onclick="toggleMainButton();">Toggle Main Button</button>    
+        ]
 
-        document.getElementById("sendData").addEventListener("click", () => {
-            tg.sendData(JSON.stringify({ message: "Hello from Mini App!" }));
-        });
-        
-        {/*
             // Init TWA
             Telegram.WebApp.ready();
     
