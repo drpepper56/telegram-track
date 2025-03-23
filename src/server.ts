@@ -1,12 +1,12 @@
-const express = require("express");
+const express = require('express');
 const path = require("path");
+
 const app = express();
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 
-app.use(express.static("public")); // Serves static files from "public" folder
-// could go to shit
+app.use(express.static("public"));
 
-app.get("/", (req, res) => {
+app.get("/", (req: any, res: { sendFile: (arg0: any) => void; }) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
