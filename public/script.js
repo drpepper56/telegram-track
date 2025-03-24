@@ -13,9 +13,11 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 Telegram.WebApp.MainButton.setParams({
     text: 'tralalero tralala'
 });
+
 Telegram.WebApp.MainButton.onClick(function () {
     Telegram.WebApp.showAlert('Main Button was clicked')
 });	
+
 Telegram.WebApp.MainButton.show();
 
 // Function to call showPopup API
@@ -73,7 +75,7 @@ document.getElementById('submit_button').addEventListener(() => {
 
 async function send_data_to_db_TESTING() {
 
-    console.log('write : big balls' )
+    tg.showAlert('write : big balls' )
 
     // create the json to send as payload
     const json_data = {
@@ -81,9 +83,7 @@ async function send_data_to_db_TESTING() {
         "value": document.getElementById('test_textbox_value')
     }
 
-    console.info(json_data);
-    console.log(json_data.key);
-    console.log(json_data.value);
+    tg.showAlert(json_data);
 
     // curl -X POST -H "Content-Type: application/json" -d '{"key": “a”, "value": “b”}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
 
@@ -98,14 +98,12 @@ async function send_data_to_db_TESTING() {
         })
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            tg.showAlert('Error writing to DB', response.statusText);
           }
       
           const result = await response.text(); // or .json() if you change the Rust endpoint to return JSON
-          console.log('Success:', result);
-          return result;
+          tg.showAlert('Success:', result);
         } catch (error) {
-          console.error('Error writing to DB:', error);
-          throw error; // Re-throw so calling code can handle it
+          tg.showAlert('Error writing to DB:', error);
     }
 }
