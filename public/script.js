@@ -63,9 +63,36 @@ Telegram.WebApp.onEvent('themeChanged', function() {
     document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+
+    const statusLabel = document.getElementById('statusLabel');
+    const refreshBtn = document.getElementById('refreshBtn');
+    
+    // Function to update label
+    function updateLabel(text) {
+        statusLabel.textContent = text;
+    }
+    
+    // Initial update
+    updateLabel(`Hello, ${tg.initDataUnsafe.user?.first_name || 'User'}!`);
+    
+    // Example with button click
+    refreshBtn.addEventListener('click', () => {
+        updateLabel('Refreshing...');
+        
+        // Simulate async operation
+        setTimeout(() => {
+            updateLabel(`Last updated: ${new Date().toLocaleTimeString()}`);
+        }, 1000);
+    });
+})
+
+
 // test connection on database through server to read something and get it here
 
 // test connection on database through server to write something into the db and get confirmation here
+
+
 
 
 async function send_data() {
@@ -75,7 +102,7 @@ async function send_data() {
         "value": document.getElementById('test_textbox_value').value
     };
 
-    // curl -X POST -H "Content-Type: application/json" -d '{"key": “a”, "value": “b”}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
+    // curl -X POST -H "Content-Type: application/json" -d '{"key": "balls", "value": "balls"}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
 
     try {
 
@@ -93,7 +120,7 @@ async function send_data() {
             document.getElementById('error_panel').value = response.text();
             tg.showAlert('Error writing to DB', response.text());
         } else {
-            document.getElementById('error_panel').value = 'success';
+            document.getElementById('error_panel').textContent = 'success';
         }
           
           const result = await response.text(); // or .json() if you change the Rust endpoint to return JSON

@@ -33,14 +33,19 @@
         </ul>
 
         <input type="text" id="test_textbox_key">
+            balls
         </input>
         <input type="text" id="test_textbox_value">
+            balls
         </input>
         <button id="submit_button" onclick="send_data();">
             send data to save in db TESTING
         </button>
 
         <label id="error_panel"></label>
+
+        <label id="statusLabel">Initial Status: Not loaded</label>
+        <button id="refreshBtn">Refresh Status</button>
 
         <h1>Buttons</h1>
         <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
