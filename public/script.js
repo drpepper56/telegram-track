@@ -72,7 +72,10 @@ function send_data_to_db_TESTING() {
         "value": document.getElementById('test_textbox_value')
     }
 
-    
+    console.info(json_data);
+    console.log(json_data.key);
+    console.log(json_data.value);
+
     fetch('https://teletrack-server-20b6f79a4151.herokuapp.com/write', {
         method: 'POST',
         headers: {
