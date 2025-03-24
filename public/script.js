@@ -15,7 +15,7 @@ Telegram.WebApp.MainButton.setParams({
 });
 
 Telegram.WebApp.MainButton.onClick(function () {
-    Telegram.WebApp.showAlert('Main Button was clicked')
+    updateLabel('Refreshing...');
 });	
 
 Telegram.WebApp.MainButton.show();
