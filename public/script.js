@@ -79,8 +79,6 @@ async function send_data() {
         "value": document.getElementById('test_textbox_value').value
     };
 
-    tg.showAlert(JSON.stringify(json_data));
-
     // curl -X POST -H "Content-Type: application/json" -d '{"key": “a”, "value": “b”}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
 
     try {
