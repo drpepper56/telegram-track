@@ -65,7 +65,7 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 
 // test connection on database through server to write something into the db and get confirmation here
 
-function send_data_to_db_TESTING(key, value) {
+function send_data_to_db_TESTING() {
     // create the json to send as payload
     const json_data = {
         "key": document.getElementById('test_textbox_key'),
