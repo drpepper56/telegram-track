@@ -67,10 +67,6 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 
 // test connection on database through server to write something into the db and get confirmation here
 
-document.getElementById('submit_button').addEventListener(onClick, () => {
-    tg.showAlert('nice environment not complicated at all for stupid reasons');
-});
-
 
 async function send_data() {
     // create the json to send as payload
@@ -92,9 +88,14 @@ async function send_data() {
         });
 
         if (!response.ok) {
+            document.getElementById('error_panel').value = 'error';
+
+            document.getElementById('error_panel').value = response.text();
             tg.showAlert('Error writing to DB', response.text());
-          }
-      
+        } else {
+            document.getElementById('error_panel').value = 'success';
+        }
+          
           const result = await response.text(); // or .json() if you change the Rust endpoint to return JSON
           tg.showAlert('Success:', result);
         } catch (error) {
