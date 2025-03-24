@@ -60,3 +60,31 @@ Telegram.WebApp.onEvent('viewportChanged', setViewportData);
 Telegram.WebApp.onEvent('themeChanged', function() {
     document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
 });
+
+// test connection on database through server to read something and get it here
+
+// test connection on database through server to write something into the db and get confirmation here
+
+function send_data_to_db_TESTING(key, value) {
+    // create the json to send as payload
+    const json_data = {
+        "key": document.getElementById('test_textbox_key'),
+        "value": document.getElementById('test_textbox_value')
+    }
+
+    
+    fetch('https://teletrack-server-20b6f79a4151.herokuapp.com/write', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(json_data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
