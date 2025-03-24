@@ -73,9 +73,6 @@ document.getElementById('submit_button').addEventListener(onClick, () => {
 
 
 async function send_data() {
-
-    tg.showAlert('write : big balls' );
-
     // create the json to send as payload
     const json_data = {
         "key": document.getElementById('test_textbox_key'),
