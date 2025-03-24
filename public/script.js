@@ -67,22 +67,24 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 
 // test connection on database through server to write something into the db and get confirmation here
 
-document.getElementById('submit_button').addEventListener(() => {
-    tg.showAlert('nice environment not complicated at all for stupid reasons')
+document.getElementById('submit_button').addEventListener(onClick, () => {
+    tg.showAlert('nice environment not complicated at all for stupid reasons');
 });
 
 
 async function send_data() {
 
-    tg.showAlert('write : big balls' )
+    tg.showAlert('write : big balls' );
 
     // create the json to send as payload
     const json_data = {
         "key": document.getElementById('test_textbox_key'),
         "value": document.getElementById('test_textbox_value')
-    }
+    };
 
-    tg.showAlert(json_data);
+    tg.showAlert('json made, ->' );
+
+    tg.showAlert(JSON.stringify(json_data));
 
     // curl -X POST -H "Content-Type: application/json" -d '{"key": “a”, "value": “b”}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
 
@@ -94,7 +96,7 @@ async function send_data() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(json_data)
-        })
+        });
 
         if (!response.ok) {
             tg.showAlert('Error writing to DB', response.statusText);
@@ -104,5 +106,5 @@ async function send_data() {
           tg.showAlert('Success:', result);
         } catch (error) {
           tg.showAlert('Error writing to DB:', error);
-    }
+    };
 }
