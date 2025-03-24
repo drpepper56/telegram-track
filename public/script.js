@@ -73,7 +73,7 @@ function send_data_to_db_TESTING() {
     }
 
     
-    fetch('https://teletrack-server-20b6f79a4151.herokuapp.com/write', {
+    fetch('https://teletrack-server-20b6f79a4151.herokuapp.com/write/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
