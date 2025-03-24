@@ -68,12 +68,11 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 // test connection on database through server to write something into the db and get confirmation here
 
 document.getElementById('submit_button').addEventListener(() => {
-    console.log('nice environment not complicated at all for stupid reasons')
-    send_data_to_db_TESTING();
+    tg.showAlert('nice environment not complicated at all for stupid reasons')
 });
 
 
-async function send_data_to_db_TESTING() {
+async function send_data() {
 
     tg.showAlert('write : big balls' )
 
