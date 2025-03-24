@@ -65,7 +65,10 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 
 // test connection on database through server to write something into the db and get confirmation here
 
-function send_data_to_db_TESTING() {
+async function send_data_to_db_TESTING() {
+
+    console.log('write : big balls' )
+
     // create the json to send as payload
     const json_data = {
         "key": document.getElementById('test_textbox_key'),
@@ -76,18 +79,27 @@ function send_data_to_db_TESTING() {
     console.log(json_data.key);
     console.log(json_data.value);
 
-    fetch('https://teletrack-server-20b6f79a4151.herokuapp.com/write', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(json_data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+    // curl -X POST -H "Content-Type: application/json" -d '{"key": “a”, "value": “b”}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
+
+    try {
+
+        const response = await fetch('https://teletrack-server-20b6f79a4151.herokuapp.com/write', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(json_data)
+        })
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+      
+          const result = await response.text(); // or .json() if you change the Rust endpoint to return JSON
+          console.log('Success:', result);
+          return result;
+        } catch (error) {
+          console.error('Error writing to DB:', error);
+          throw error; // Re-throw so calling code can handle it
+    }
 }
