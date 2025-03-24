@@ -75,8 +75,8 @@ document.getElementById('submit_button').addEventListener(onClick, () => {
 async function send_data() {
     // create the json to send as payload
     const json_data = {
-        "key": document.getElementById('test_textbox_key'),
-        "value": document.getElementById('test_textbox_value')
+        "key": document.getElementById('test_textbox_key').value,
+        "value": document.getElementById('test_textbox_value').value
     };
 
     tg.showAlert(JSON.stringify(json_data));
