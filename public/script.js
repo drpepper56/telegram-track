@@ -92,7 +92,7 @@ async function send_data() {
         });
 
         if (!response.ok) {
-            tg.showAlert('Error writing to DB', response.statusText);
+            tg.showAlert('Error writing to DB', response.text());
           }
       
           const result = await response.text(); // or .json() if you change the Rust endpoint to return JSON
