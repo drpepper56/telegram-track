@@ -49,12 +49,11 @@ async function get_user_id(){
 
 
 let tg = window.Telegram.WebApp;
-tg.expand(); // Expand the app to full screen
-get_user_id();
-notification_handler();
 
 // Init TWA
 Telegram.WebApp.ready();
+Telegram.WebApp.expand();
+notification_handler();
 
 // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
 Telegram.WebApp.onEvent('themeChanged', function() {
