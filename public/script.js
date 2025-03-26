@@ -36,6 +36,15 @@ function notify(value1, value2) {
     `;
 }
 
+// get user ID 
+// TODO: delete very soon
+async function get_user_id(){
+    const userId = tg.initDataUnsafe.user?.id;
+    document.getElementById('user_id').textContent = userId;
+}
+get_user_id()
+
+
 let tg = window.Telegram.WebApp;
 tg.expand(); // Expand the app to full screen
 notification_handler();
@@ -120,6 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Example with button click
     refreshBtn.addEventListener('click', () => {
         updateLabel('Refreshing...');
+        get_user_id()
         
         // Simulate async operation
         setTimeout(() => {
