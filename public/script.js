@@ -6,6 +6,7 @@ function notification_handler() {
     const queryString = window.location.search;
     const startParam = new URLSearchParams(queryString);
 
+    console.log(queryString);
     console.log(startParam);
 
     try {
