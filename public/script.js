@@ -1,5 +1,44 @@
+/*
+    NOTIFICATION HANDLER
+*/
+function notification_handler() {
+    // get the notification data
+    const queryString = window.location.search;
+    const params = new URLSearchParams(queryString);
+    
+    if (params.has('startapp')) {
+        const startAppParam = params.get('startapp');
+        
+        // json opening
+        if (startAppParam.startsWith('notification_')) {
+            // notification
+            const value1 = params.get('balls');
+            const value2 = params.get('balls2');
+            if (value1 && value2) {
+                notify(value1, value2);
+            }
+        }
+        else if (startAppParam.startsWith('update_')) {
+            // Silent update
+            tg.showAlert('hello from the server via silent update')
+        }
+    }
+}
+
+// show the stuff from the notification in the dom
+function notify(value1, value2) {    
+    document.getElementById('notification-banner').innerHTML = `
+        <div class="order-notification">
+            <h3>here are your notification parameters</h3>
+            <p>value1#${value1}</p>
+            <p>value2#${value2}</p>
+        </div> 
+    `;
+}
+
 let tg = window.Telegram.WebApp;
 tg.expand(); // Expand the app to full screen
+notification_handler();
 
 // Init TWA
 Telegram.WebApp.ready();
@@ -129,40 +168,3 @@ async function send_data() {
     };
 }
 
-/*
-    NOTIFICATION HANDLER
-*/
-function notification_handler() {
-    // get the notification data
-    const queryString = window.location.search;
-    const params = new URLSearchParams(queryString);
-    
-    if (params.has('startapp')) {
-        const startAppParam = params.get('startapp');
-        
-        // json opening
-        if (startAppParam.startsWith('notification_')) {
-            // notification
-            const value1 = params.get('balls');
-            const value2 = params.get('balls2');
-            if (value1 && value2) {
-                notify(value1, value2);
-            }
-        }
-        else if (startAppParam.startsWith('update_')) {
-            // Silent update
-            tg.showAlert('hello from the server via silent update')
-        }
-    }
-}
-
-// show the stuff from the notification in the dom
-function notify(value1, value2) {    
-    document.getElementById('notification-banner').innerHTML = `
-        <div class="order-notification">
-            <h3>here are your notification parameters</h3>
-            <p>value1#${value1}</p>
-            <p>value2#${value2}</p>
-        </div>
-    `;
-}
