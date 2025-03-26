@@ -31,20 +31,9 @@ function notification_handler() {
 
 // show the stuff from the notification in the dom
 function notify(value1, value2) {    
-    document.getElementById('notification-banner').innerHTML = `
-        <div class="order-notification">
-            <h3>here are your notification parameters</h3>
-            <p>value1#${value1}</p>
-            <p>value2#${value2}</p>
-        </div> 
-    `;
-}
-
-// get user ID 
-// TODO: delete very soon
-async function get_user_id(){
-    const userId = tg.initDataUnsafe.user?.id;
-    document.getElementById('user_id').textContent = userId;
+    document.getElementById("parameter1").textContent = value1;
+    document.getElementById("parameter2").textContent = value2;
+    
 }
 
 
@@ -137,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
             two function calls added for testing since im a dumbass without react
             TODO: delete later
         */
-        get_user_id();
         notification_handler();
         
         // Simulate async operation
