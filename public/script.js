@@ -5,13 +5,15 @@ function notification_handler() {
     // get the notification data
     const queryString = window.location.search;
     const params = new URLSearchParams(queryString);
+
+    tg.showAlert("script kinda works")
     
     if (params.has('startapp')) {
         const startAppParam = params.get('startapp');
         
         // json opening
         if (startAppParam.startsWith('notification_')) {
-            tg.showAlert("script kinda works")
+            tg.showAlert("script kinda works better")
 
             // notification
             const value1 = params.get('balls');

@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node src/server.js",
-    "deploy": "git push heroku main"
+    "deploy": "git add . && git commit -m 'quick heroku deploy' && git push heroku main"
   },
   "dependencies": {
     "express": "^4.18.2"
