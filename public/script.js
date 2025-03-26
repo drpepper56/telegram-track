@@ -3,32 +3,28 @@
 */
 function notification_handler() {
     // get the notification data
-    const queryString = window.location.search;
-    const params = new URLSearchParams(queryString);
+    const startParam = tg.startParam; // Get the base64 encoded string
 
-    console.log(queryString);
-    
-    if (params.has('startapp')) {
-        const startAppParam = params.get('startapp');
-        
+    console.log(startParam);
+
+    try {
+        const decoded = atob(startParam);
+        const params = JSON.parse(decoded);
+        console.log("All parameters:", params);
         // json opening
-        if (startAppParam.startsWith('notification_')) {
-            tg.showAlert("script kinda works better")
+        console.log("script kinda works better")
 
-            // notification
-            const value1 = params.get('balls');
-            const value2 = params.get('balls2');
-            if (value1 && value2) {
-                notify(value1, value2);
-            } else {
-                tg.showAlert("parameters dislocated")
-            }
+        // notification
+        const value1 = params.get('balls');
+        const value2 = params.get('balls2');
+        if (value1 && value2) {
+            notify(value1, value2);
+        } else {
+            tg.showAlert("parameters dislocated")
         }
-        else if (startAppParam.startsWith('update_')) {
-            // Silent update
-            tg.showAlert('hello from the server via silent update')
-        }
-    }
+    } catch (e) {
+        console.error("Error parsing start param:", e);
+    } 
 }
 
 // show the stuff from the notification in the dom
