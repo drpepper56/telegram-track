@@ -7,9 +7,10 @@ function notification_handler() {
     const match = queryString.match(/startapp=([^&]+)/);
     const startParam = new URLSearchParams(match);
 
-    console.log(queryString);
-    console.log(match);
-    console.log(startParam);
+    console.log('queryString', queryString);
+    console.log('match', match);
+    console.log('startParam', startParam);
+    
 
     try {
         const decoded = atob(startParam);
