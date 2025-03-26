@@ -4,30 +4,24 @@ let tg = window.Telegram.WebApp;
 */
 function notification_handler() {
     // get the notification data
-    const startParam = window.location.search
-
-    console.log('startParam', startParam);
-    
-
     try {
-        const decoded = atob(startParam);
-        console.log('decoded', decoded)
+        // URL-safe base64 decoding
+        const decoded = atob(tg.startParam.replace(/-/g, '+').replace(/_/g, '/'));
         const params = JSON.parse(decoded);
         console.log("All parameters:", params);
-        // json opening
-        console.log("script kinda works better")
-
-        // notification
-        const value1 = params.get('balls');
-        const value2 = params.get('balls2');
-        if (value1 && value2) {
-            notify(value1, value2);
-        } else {
-            tg.showAlert("parameters dislocated")
-        }
     } catch (e) {
         console.error("Error parsing start param:", e);
-    } 
+        Telegram.WebApp.showAlert("Error loading notification data");
+    }
+
+
+    // const value1 = params.get('balls');
+    // const value2 = params.get('balls2');
+    // if (value1 && value2) {
+    //     notify(value1, value2);
+    // } else {
+    //     tg.showAlert("parameters dislocated")
+    // }
 }
 
 // show the stuff from the notification in the dom
