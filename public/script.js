@@ -3,7 +3,7 @@
 */
 function notification_handler() {
     // get the notification data
-    const queryString = window.location.search;
+    const queryString = window.location.href;
     const startParam = new URLSearchParams(queryString);
 
     console.log(queryString);
