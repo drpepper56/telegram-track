@@ -3,15 +3,14 @@
 */
 function notification_handler() {
     // get the notification data
-    const queryString = window.location.location;
-    const startParam = new URLSearchParams(queryString);
+    const startParam = tg.startParam
 
-    console.log('queryString', queryString);
     console.log('startParam', startParam);
     
 
     try {
         const decoded = atob(startParam);
+        console.log('decoded', decoded)
         const params = JSON.parse(decoded);
         console.log("All parameters:", params);
         // json opening
