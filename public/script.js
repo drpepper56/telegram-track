@@ -5,8 +5,9 @@ let tg = window.Telegram.WebApp;
 function notification_handler() {
     // get the notification data
     let tg = window.Telegram.WebApp;
-
+    let startparams2 = location.window.search
     console.log('pam param', tg.startParam)
+    console.log('pam param2', startparams2)
     try {
         // URL-safe base64 decoding
         const decoded = atob(tg.startParam.replace(/-/g, '+').replace(/_/g, '/'));
