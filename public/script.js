@@ -6,7 +6,8 @@ function notification_handler() {
     const queryString = window.location.search;
     const params = new URLSearchParams(queryString);
 
-    tg.showAlert(params);
+    console.log(params.values());
+    tg.showAlert(params.values());
     
     if (params.has('startapp')) {
         const startAppParam = params.get('startapp');
