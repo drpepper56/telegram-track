@@ -9,16 +9,11 @@ function notification_handler() {
     try {
         // json -> base64 -> json decoding pogchamp
         const urlParams = new URLSearchParams(startParam);
-        console.log('urlParams', urlParams)
         const encodedParam = urlParams.get('tgWebAppStartParam'); 
-        console.log('encodedParam', encodedParam)
         const urlDecoded = decodeURIComponent(encodedParam);
-        console.log('urlDecoded', urlDecoded)
         const base64Decoded = atob(urlDecoded.replace(/-/g, '+').replace(/_/g, '/'));
-        console.log('base64Decoded', base64Decoded)
         const decodedData = JSON.parse(base64Decoded);
-        console.log('decodedData', decodedData)
-        
+        notify(decodedData.balls, decodedData.balls2);
     } catch (e) {
         console.error("Error parsing start param:", e);
     }
