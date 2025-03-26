@@ -1,3 +1,4 @@
+let tg = window.Telegram.WebApp;
 /*
     NOTIFICATION HANDLER
 */
@@ -35,9 +36,6 @@ function notify(value1, value2) {
     document.getElementById("parameter2").textContent = value2;
     
 }
-
-
-let tg = window.Telegram.WebApp;
 
 // Init TWA
 Telegram.WebApp.ready();
