@@ -3,7 +3,8 @@
 */
 function notification_handler() {
     // get the notification data
-    const startParam = tg.startParam; // Get the base64 encoded string
+    const queryString = window.location.search;
+    const startParam = new URLSearchParams(queryString);
 
     console.log(startParam);
 
