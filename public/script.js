@@ -7,11 +7,11 @@ function notification_handler() {
     try {
         // URL-safe base64 decoding
         const decoded = atob(tg.startParam.replace(/-/g, '+').replace(/_/g, '/'));
+        console.log("Decoded start param:", decoded);
         const params = JSON.parse(decoded);
         console.log("All parameters:", params);
     } catch (e) {
         console.error("Error parsing start param:", e);
-        Telegram.WebApp.showAlert("Error loading notification data");
     }
 
 
