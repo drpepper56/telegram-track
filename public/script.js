@@ -3,17 +3,22 @@ let tg = window.Telegram.WebApp;
     NOTIFICATION HANDLER
 */
 function notification_handler() {
-    // get the notification data
-    let tg = window.Telegram.WebApp;
-    let startparams2 = window.location.search;
-    console.log('pam param', tg.startParam)
-    console.log('pam param2', startparams2)
+    // get the deep link url value and cheat this stupid environment
+    let startParam = window.location.search;
+    console.log('startParam', startParam)
     try {
-        // URL-safe base64 decoding
-        const decoded = atob(tg.startParam.replace(/-/g, '+').replace(/_/g, '/'));
-        console.log("Decoded start param:", decoded);
-        const params = JSON.parse(decoded);
-        console.log("All parameters:", params);
+        // json -> base64 -> json decoding pogchamp
+        const urlParams = new URLSearchParams(startParam);
+        console.log('urlParams', urlParams)
+        const encodedParam = urlParams.get('tgWebAppStartParam'); 
+        console.log('encodedParam', encodedParam)
+        const urlDecoded = decodeURIComponent(encodedParam);
+        console.log('urlDecoded', urlDecoded)
+        const base64Decoded = atob(urlDecoded.replace(/-/g, '+').replace(/_/g, '/'));
+        console.log('base64Decoded', base64Decoded)
+        const decodedData = JSON.parse(base64Decoded);
+        console.log('decodedData', decodedData)
+        
     } catch (e) {
         console.error("Error parsing start param:", e);
     }
