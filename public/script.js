@@ -5,7 +5,7 @@ let tg = window.Telegram.WebApp;
 function notification_handler() {
     // get the notification data
     let tg = window.Telegram.WebApp;
-    let startparams2 = location.window.search
+    let startparams2 = window.location.search;
     console.log('pam param', tg.startParam)
     console.log('pam param2', startparams2)
     try {
