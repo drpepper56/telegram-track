@@ -4,6 +4,8 @@ let tg = window.Telegram.WebApp;
 */
 function notification_handler() {
     // get the notification data
+    let tg = window.Telegram.WebApp;
+
     console.log('pam param', tg.startParam)
     try {
         // URL-safe base64 decoding
