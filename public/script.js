@@ -16,6 +16,8 @@ function notification_handler() {
             const value2 = params.get('balls2');
             if (value1 && value2) {
                 notify(value1, value2);
+            } else {
+                tg.showAlert("parameters dislocated")
             }
         }
         else if (startAppParam.startsWith('update_')) {
@@ -42,11 +44,11 @@ async function get_user_id(){
     const userId = tg.initDataUnsafe.user?.id;
     document.getElementById('user_id').textContent = userId;
 }
-get_user_id()
 
 
 let tg = window.Telegram.WebApp;
 tg.expand(); // Expand the app to full screen
+get_user_id();
 notification_handler();
 
 // Init TWA
@@ -129,7 +131,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Example with button click
     refreshBtn.addEventListener('click', () => {
         updateLabel('Refreshing...');
-        get_user_id()
+
+        /*
+            two function calls added for testing since im a dumbass without react
+            TODO: delete later
+        */
+        get_user_id();
+        notification_handler();
         
         // Simulate async operation
         setTimeout(() => {
