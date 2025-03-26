@@ -4,9 +4,11 @@
 function notification_handler() {
     // get the notification data
     const queryString = window.location.href;
-    const startParam = new URLSearchParams(queryString);
+    const match = originalUrl.match(/startapp=([^&]+)/);
+    const startParam = new URLSearchParams(match);
 
     console.log(queryString);
+    console.log(match);
     console.log(startParam);
 
     try {
