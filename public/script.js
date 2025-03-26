@@ -11,6 +11,8 @@ function notification_handler() {
         
         // json opening
         if (startAppParam.startsWith('notification_')) {
+            tg.showAlert("script kinda works")
+
             // notification
             const value1 = params.get('balls');
             const value2 = params.get('balls2');
