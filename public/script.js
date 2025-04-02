@@ -1,3 +1,7 @@
+// what a mess
+
+const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
+
 let tg = window.Telegram.WebApp;
 /*
     NOTIFICATION HANDLER
@@ -18,14 +22,6 @@ function notification_handler() {
         console.error("Error parsing start param:", e);
     }
 
-
-    // const value1 = params.get('balls');
-    // const value2 = params.get('balls2');
-    // if (value1 && value2) {
-    //     notify(value1, value2);
-    // } else {
-    //     tg.showAlert("parameters dislocated")
-    // }
 }
 
 // show the stuff from the notification in the dom
@@ -147,7 +143,7 @@ async function send_data() {
 
     try {
 
-        const response = await fetch('https://teletrack-server-20b6f79a4151.herokuapp.com/write', {
+        const response = await fetch(BACKEND_LINK + '/write', {
             method: 'post',
             headers: {
                 'Content-Type': 'application/json'
