@@ -2,7 +2,7 @@
     IMPORTS
 */
 
-import { crypto } from 'crypto';
+import crypto from 'crypto';
 
 /*
     CONSTANTS
