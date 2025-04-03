@@ -48,7 +48,11 @@ function notification_handler() {
 
 /// hash function for putting userID hash in every request header //TODO: put everywhere
 function get_user_id_hash() {
-    return crypto.subtle.digest('sha256', tg.initDataUnsafe.user.id.toString());
+    if (!window.crypto || !window.crypto.subtle) {
+        throw new Error("Web Crypto API is not available in this environment");
+    }
+    let digest = crypto.subtle.digest('sha256', tg.initDataUnsafe.user.id.toString());
+    return digest
 }
 
 
