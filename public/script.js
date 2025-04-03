@@ -244,7 +244,12 @@ async function send_data() {
 
             document.getElementById('error_panel').value = response.text();
             console.log('Response status error', response.status, response.text());
-        } else {
+        } else if (response.status == 520) {
+            console.log("USER DOESN'T EXIST YET")
+            //TODO: send request to create the user
+        } 
+        
+        else {
             document.getElementById('error_panel').textContent = 'success';
         }
           
