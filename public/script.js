@@ -47,25 +47,13 @@ function notification_handler() {
 */
 
 /// hash function for putting userID hash in every request header //TODO: put everywhere
-async function sha256(message) {
-    // Encode the message as UTF-8
-    console.log(message);
-    const msgBuffer = new TextEncoder().encode(message);
-    console.log(msgBuffer);
-
-    // Hash the message
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    console.log(hashBuffer);
-
-    return hashBuffer; // Returns raw ArrayBuffer
-  }
 async function get_user_id_hash() {
     if (!window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
         throw new Error("Telegram user data not available");
-      }
-
-    const userId = Telegram.WebApp.initDataUnsafe.user.id.toString();
-    return await sha256(userId);
+    }
+    const digest = await crypto.subtle.digest('SHA-256', Telegram.WebApp.initDataUnsafe.user.id.toString());
+    console.log(digest);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 
@@ -234,8 +222,8 @@ async function send_data() {
         const response = await fetch(BACKEND_LINK + '/write', {
             method: 'post',
             headers: {
-                'Content-Type': 'application/json',
-                'User-ID-Hash': get_user_id_hash()
+                'Content-Type': 'application/json'
+                // 'User-ID-Hash': get_user_id_hash()
             },
             body: JSON.stringify(json_data)
         });
