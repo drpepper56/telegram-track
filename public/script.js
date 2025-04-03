@@ -242,7 +242,7 @@ async function send_data() {
             document.getElementById('error_panel').value = 'error';
 
             document.getElementById('error_panel').value = response.text();
-            console.log('Error writing to DB', response.text());
+            console.log('Response status error', response.status, response.text());
         } else {
             document.getElementById('error_panel').textContent = 'success';
         }
@@ -250,6 +250,6 @@ async function send_data() {
           const result = await response.text(); // or .json() if you change the Rust endpoint to return JSON
           console.log('Success:', result);
         } catch (error) {
-          console.log('Error writing to DB:', error);
+          console.log('some other error:', error);
     };
 }
