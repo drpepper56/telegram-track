@@ -55,7 +55,7 @@ function get_user_id_hash() {
                 resolve(hashHex);
             })
             .catch(err => {
-                reject(new Error(`Hashing failed: ${err.message}`));
+                new Error(`Hashing failed: ${err.message}`);
             });
 }
 
