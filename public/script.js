@@ -47,16 +47,22 @@ function notification_handler() {
 */
 
 /// hash function for putting userID hash in every request header //TODO: put everywhere
-function get_user_id_hash() {
-    return window.crypto.subtle.digest('SHA-256', tg.initDataUnsafe.user.id.toString())
-            .then(hashBuffer => {
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                resolve(hashHex);
-            })
-            .catch(err => {
-                new Error(`Hashing failed: ${err.message}`);
-            });
+async function sha256(message) {
+    // Encode the message as UTF-8
+    const msgBuffer = new TextEncoder().encode(message);
+    
+    // Hash the message
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    
+    return hashBuffer; // Returns raw ArrayBuffer
+  }
+async function get_user_id_hash() {
+    if (!window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        throw new Error("Telegram user data not available");
+      }
+
+      const userId = Telegram.WebApp.initDataUnsafe.user.id.toString();
+      return await sha256(userId);
 }
 
 
