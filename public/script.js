@@ -9,8 +9,8 @@
     CONSTANTS
 */
 
-const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
-// const BACKEND_LINK = 'http://127.0.0.1:8080';
+// const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
+const BACKEND_LINK = 'http://127.0.0.1:8080';
 
 /*
     Init TWA
@@ -52,14 +52,9 @@ async function get_user_id_hash() {
         throw new Error("Telegram user data not available");
     }
     try {
-        // 2. Convert string to ArrayBuffer
         const encoder = new TextEncoder();
         const data = encoder.encode(Telegram.WebApp.initDataUnsafe.user.id.toString());
-        
-        // 3. Generate SHA-256 hash
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        
-        // 4. Convert ArrayBuffer to hex string (optional)
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         console.log('Hash:', hashHex);
