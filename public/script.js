@@ -226,14 +226,14 @@ async function send_data() {
             document.getElementById('error_panel').value = 'error';
 
             document.getElementById('error_panel').value = response.text();
-            tg.showAlert('Error writing to DB', response.text());
+            console.log('Error writing to DB', response.text());
         } else {
             document.getElementById('error_panel').textContent = 'success';
         }
           
           const result = await response.text(); // or .json() if you change the Rust endpoint to return JSON
-          tg.showAlert('Success:', result);
+          console.log('Success:', result);
         } catch (error) {
-          tg.showAlert('Error writing to DB:', error);
+          console.log('Error writing to DB:', error);
     };
 }
