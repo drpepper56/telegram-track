@@ -1,11 +1,28 @@
-// what a mess
+/*
+    IMPORTS
+*/
+
+const crypto = require('crypto');
+
+/*
+    CONSTANTS
+*/
 
 const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
 
-let tg = window.Telegram.WebApp;
 /*
-    NOTIFICATION HANDLER
+    Init TWA
 */
+
+let tg = window.Telegram.WebApp;
+Telegram.WebApp.ready();
+Telegram.WebApp.expand();
+notification_handler();
+
+/*
+    NOTIFICATION HANDLERS
+*/
+
 function notification_handler() {
     // get the deep link url value and cheat this stupid environment
     let startParam = window.location.search;
@@ -21,8 +38,38 @@ function notification_handler() {
     } catch (e) {
         console.error("Error parsing start param:", e);
     }
-
 }
+
+/*
+    UTILITY FUNCTIONS
+*/
+
+/// hash function for putting userID hash in every request header //TODO: put everywhere
+function get_user_id_hash() {
+    return crypto.createHash('sha256').update(tg.initDataUnsafe.user.id.toString()).digest('hex');
+}
+
+
+
+/*
+
+
+
+
+
+
+
+
+
+clean everything down there too much testing going on
+
+
+
+
+
+
+
+*/
 
 // show the stuff from the notification in the dom
 function notify(value1, value2) {    
@@ -31,10 +78,7 @@ function notify(value1, value2) {
     
 }
 
-// Init TWA
-Telegram.WebApp.ready();
-Telegram.WebApp.expand();
-notification_handler();
+
 
 // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
 Telegram.WebApp.onEvent('themeChanged', function() {
@@ -96,7 +140,10 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 });
 
 
-// testing function
+/*
+    ONLY KNOWN WAY TO UPDATE THE DOM WITH VALUES DYNAMICALLY
+*/
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const statusLabel = document.getElementById('statusLabel');
@@ -128,8 +175,30 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 
-// test connection on database through server to read something and get it here
-// TODO: implement
+/*
+
+
+
+
+
+
+
+
+
+garbage end
+
+
+
+
+
+
+
+*/
+
+
+/*
+    ONLY KNOWN WAY TO SEND REQUESTS TO THE SERVER
+*/
 
 // test connection on database through server to write something into the db and get confirmation here
 async function send_data() {
@@ -146,7 +215,8 @@ async function send_data() {
         const response = await fetch(BACKEND_LINK + '/write', {
             method: 'post',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'User-ID-Hash': get_user_id_hash()
             },
             body: JSON.stringify(json_data)
         });
@@ -166,4 +236,3 @@ async function send_data() {
           tg.showAlert('Error writing to DB:', error);
     };
 }
-
