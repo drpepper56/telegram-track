@@ -49,11 +49,14 @@ function notification_handler() {
 /// hash function for putting userID hash in every request header //TODO: put everywhere
 async function sha256(message) {
     // Encode the message as UTF-8
+    console.log(message);
     const msgBuffer = new TextEncoder().encode(message);
-    
+    console.log(msgBuffer);
+
     // Hash the message
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    
+    console.log(hashBuffer);
+
     return hashBuffer; // Returns raw ArrayBuffer
   }
 async function get_user_id_hash() {
@@ -61,8 +64,8 @@ async function get_user_id_hash() {
         throw new Error("Telegram user data not available");
       }
 
-      const userId = Telegram.WebApp.initDataUnsafe.user.id.toString();
-      return await sha256(userId);
+    const userId = Telegram.WebApp.initDataUnsafe.user.id.toString();
+    return await sha256(userId);
 }
 
 
