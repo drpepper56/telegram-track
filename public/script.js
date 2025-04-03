@@ -9,8 +9,8 @@
     CONSTANTS
 */
 
-const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
-// const BACKEND_LINK = 'http://127.0.0.1:8080';
+// const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
+const BACKEND_LINK = 'http://127.0.0.1:8080';
 
 /*
     Init TWA
@@ -222,8 +222,8 @@ async function send_data() {
         const response = await fetch(BACKEND_LINK + '/write', {
             method: 'post',
             headers: {
-                'Content-Type': 'application/json'
-                // 'User-ID-Hash': get_user_id_hash()
+                'Content-Type': 'application/json',
+                'Authorization': get_user_id_hash()
             },
             body: JSON.stringify(json_data)
         });
