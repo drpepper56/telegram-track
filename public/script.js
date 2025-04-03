@@ -2,7 +2,8 @@
     IMPORTS
 */
 
-import crypto from 'crypto';
+
+// adssaf
 
 /*
     CONSTANTS
@@ -47,7 +48,7 @@ function notification_handler() {
 
 /// hash function for putting userID hash in every request header //TODO: put everywhere
 function get_user_id_hash() {
-    return crypto.createHash('sha256').update(tg.initDataUnsafe.user.id.toString()).digest('hex');
+    return crypto.subtle.digest('sha256', tg.initDataUnsafe.user.id.toString());
 }
 
 
