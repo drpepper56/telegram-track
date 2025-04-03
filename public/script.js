@@ -234,7 +234,7 @@ async function send_data() {
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
-                'X-User-ID-Hash': get_user_id_hash()
+                'X-User-ID-Hash': '41848d721eee5b1fb268045a6fb4418872d1e199bc09b01e97ed78eff0a87507'
             },
             body: JSON.stringify(json_data)
         });
