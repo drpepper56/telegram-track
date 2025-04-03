@@ -51,9 +51,23 @@ async function get_user_id_hash() {
     if (!window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
         throw new Error("Telegram user data not available");
     }
-    const digest = await crypto.subtle.digest('SHA-256', Telegram.WebApp.initDataUnsafe.user.id.toString());
-    console.log(digest);
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    try {
+        // 2. Convert string to ArrayBuffer
+        const encoder = new TextEncoder();
+        const data = encoder.encode(Telegram.WebApp.initDataUnsafe.user.id.toString());
+        
+        // 3. Generate SHA-256 hash
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        
+        // 4. Convert ArrayBuffer to hex string (optional)
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        console.log('Hash:', hashHex);
+        return hashHex; 
+    } catch (error) {
+        console.error('Error generating hash:', error);
+        throw error;
+    }
 }
 
 
