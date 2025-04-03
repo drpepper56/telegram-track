@@ -48,7 +48,7 @@ function notification_handler() {
 
 /// hash function for putting userID hash in every request header //TODO: put everywhere
 function get_user_id_hash() {
-    return window.crypto.subtle.digest('SHA-256', window.initDataUnsafe.user.id.toString())
+    return window.crypto.subtle.digest('SHA-256', tg.initDataUnsafe.user.id.toString())
             .then(hashBuffer => {
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
                 const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
