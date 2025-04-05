@@ -252,7 +252,7 @@ async function send_data() {
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
+                'Origin': window.location.origin,
                 'X-User-ID-Hash': user_id_hash
             },
             body: JSON.stringify(json_data)
