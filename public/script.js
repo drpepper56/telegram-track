@@ -246,22 +246,25 @@ async function send_data() {
         console.log('Response headers:', response.headers);
         console.log('Response body:', await response.text());
 
-        if (!response.ok) {
-            document.getElementById('error_panel').value = 'error';
-
-            document.getElementById('error_panel').value = response.text();
-            console.log('Response status error', response.status, response.text());
-        } else if (response.status == 520) {
+        if (response.status == 520) {
+        // user doesn't exist yet
             console.log("USER DOESN'T EXIST YET")
+            data = await response.json();
+            let message = data?.['expected error'] ?? data?.expected_error ?? null;
+            console.log(message)
             //TODO: send request to create the user
-        } 
-        
-        else {
+        } else if (response.ok) {
+            console.log('write successful')
             document.getElementById('error_panel').textContent = 'success';
+        } else if (!response.ok) {
+            console.log('Response status error', response.status, response.text());  
+            document.getElementById('error_panel').value = 'error';
+            document.getElementById('error_panel').value = response.text();
+        } else {
+            throw new error('unknown error');
         }
           
-          const result = await response.text(); // or .json() if you change the Rust endpoint to return JSON
-          console.log('Success:', result);
+    
         } catch (error) {
           console.log('some other error:', error);
     };
