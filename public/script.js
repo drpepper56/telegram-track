@@ -239,6 +239,7 @@ async function send_data() {
                 'Access-Control-Request-Method': 'POST',
                 'Access-Control-Request-Headers': 'Content-Type',
                 'Content-Type': 'application/json',
+                'Origin': window.location.origin
             }
         });
 
