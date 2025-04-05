@@ -247,7 +247,7 @@ async function send_data() {
         }
 
 
-        const response = await fetch(BACKEND_LINK + '/write', {
+        const response = await fetch('https://webhook.site/7973c892-65b2-4390-a23e-410c50640361', {
             method: 'post',
             mode: 'cors',
             headers: {
