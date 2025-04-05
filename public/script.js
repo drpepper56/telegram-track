@@ -242,6 +242,7 @@ async function send_data() {
             body: JSON.stringify(json_data)
         });
 
+        /* the more errors you get the smarter you are */
         const responseClone = response.clone();
 
         if (response.status == 520) {
@@ -254,6 +255,7 @@ async function send_data() {
                 console.log(message)
                 //TODO: send request to create the user
             } catch (parseError) {
+                /* the more errors you get the smarter you are */
                 console.error('Failed to parse 520 response:', parseError);
             }
         } else if (response.ok) {
@@ -264,11 +266,13 @@ async function send_data() {
             document.getElementById('error_panel').textContent = 'error';
             document.getElementById('error_panel').textContent = response.text();
         } else {
+            /* the more errors you get the smarter you are */
             throw new error('unknown error');
         }
           
     
         } catch (error) {
-          console.log('some other error:', error);
+            /* the more errors you get the smarter you are */   
+            console.log('some other error:', error);
     };
 }
