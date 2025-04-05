@@ -242,24 +242,27 @@ async function send_data() {
             body: JSON.stringify(json_data)
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        console.log('Response body:', await response.text());
+        const responseClone = response.clone();
 
         if (response.status == 520) {
         // user doesn't exist yet
-            console.log("USER DOESN'T EXIST YET")
-            data = await response.json();
-            let message = data?.['expected error'] ?? data?.expected_error ?? null;
-            console.log(message)
-            //TODO: send request to create the user
+            try {
+
+                console.log("USER DOESN'T EXIST YET");
+                data = await responseClone.json();
+                let message = data?.['expected error'] ?? data?.expected_error ?? null;
+                console.log(message)
+                //TODO: send request to create the user
+            } catch (parseError) {
+                console.error('Failed to parse 520 response:', parseError);
+            }
         } else if (response.ok) {
             console.log('write successful')
             document.getElementById('error_panel').textContent = 'success';
         } else if (!response.ok) {
             console.log('Response status error', response.status, response.text());  
-            document.getElementById('error_panel').value = 'error';
-            document.getElementById('error_panel').value = response.text();
+            document.getElementById('error_panel').textContent = 'error';
+            document.getElementById('error_panel').textContent = response.text();
         } else {
             throw new error('unknown error');
         }
