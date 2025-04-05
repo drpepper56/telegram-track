@@ -242,6 +242,10 @@ async function send_data() {
             body: JSON.stringify(json_data)
         });
 
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        console.log('Response body:', await response.text());
+
         if (!response.ok) {
             document.getElementById('error_panel').value = 'error';
 
