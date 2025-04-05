@@ -239,11 +239,12 @@ async function send_data() {
                 'Access-Control-Request-Method': 'POST',
                 'Access-Control-Request-Headers': 'Content-Type',
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
             }
         });
 
-
+        if (!preflightResponse.ok) {
+            throw new Error(`Preflight failed: ${preflightResponse.status}`);
+        }
 
 
         const response = await fetch(BACKEND_LINK + '/write', {
@@ -252,8 +253,6 @@ async function send_data() {
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
-                'Origin': window.location.origin,
-                'Referer': window.location.origin,
                 'X-User-ID-Hash': user_id_hash
             },
             body: JSON.stringify(json_data)
