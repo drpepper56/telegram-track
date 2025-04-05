@@ -9,9 +9,9 @@
     CONSTANTS
 */
 
-const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
+// const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
 // const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
-// const BACKEND_LINK = 'http://127.0.0.1:8080';
+const BACKEND_LINK = 'http://127.0.0.1:8080';
 
 /*
     Init TWA
@@ -224,17 +224,37 @@ async function send_data() {
         "key": document.getElementById('test_textbox_key').value,
         "value": document.getElementById('test_textbox_value').value
     };
+    const user_id_hash = await get_user_id_hash();
+    
 
     // curl -X POST -H "Content-Type: application/json" -d '{"key": "balls", "value": "balls"}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
 
     try {
+
+        //try preflight first
+        const preflight_response = await fetch(BACKEND_LINK + '/write', {
+            method: 'OPTIONS',
+            mode: 'cors',
+            headers: {
+                'Access-Control-Request-Method': 'POST',
+                'Access-Control-Request-Headers': 'Content-Type',
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            }
+        });
+
+
+
 
         const response = await fetch(BACKEND_LINK + '/write', {
             method: 'post',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json',
-                'X-User-ID-Hash': '41848d721eee5b1fb268045a6fb4418872d1e199bc09b01e97ed78eff0a87507'
+                'Access-Control-Allow-Origin': '*',
+                'Origin': window.location.origin,
+                'Referer': window.location.origin,
+                'X-User-ID-Hash': user_id_hash
             },
             body: JSON.stringify(json_data)
         });
