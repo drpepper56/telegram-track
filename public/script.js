@@ -231,40 +231,68 @@ async function send_data() {
 
     try {
 
-        const response = await fetch(BACKEND_LINK + '/write', {
+        // headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin,
+            'X-User-ID-Hash': user_id_hash
+        }
+
+        // save the primary message
+        const prime_message = fetch(BACKEND_LINK + '/write', {
             method: 'post',
             mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Origin': window.location.origin,
-                'X-User-ID-Hash': user_id_hash
-            },
+            headers: headers,
             body: JSON.stringify(json_data)
         });
 
-        /* the more errors you get the smarter you are */
-        const responseClone = response.clone();
+        // send the primary message
+        const prime_response = await prime_message;
 
-        if (response.status == 520) {
+        // /* the more errors you get the smarter you are */
+        // const responseClone = response.clone();
+
+        if (prime_response.status == 520) {
         // user doesn't exist yet
             try {
-
+                // read the body of the user not existing error
                 console.log("USER DOESN'T EXIST YET");
-                data = await responseClone.json();
+                data = await prime_response.json();
                 let message = data?.['expected error'] ?? data?.expected_error ?? null;
                 console.log(message)
-                //TODO: send request to create the user
+
+                // send request to create the user                                                             
+                // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
+                const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
+                    method: 'post',
+                    mode: 'cors',
+                    headers: headers,
+                    body: JSON.stringify(json_data)
+                });
+
+                if(create_user_response.ok) {
+                    // resend primary message
+                    const second_prime_response = await prime_message;
+                    if(second_prime_response.ok) {
+                        // write successful
+                        console.log("WRITE GOOD AND USER CREATED")
+                    } else {
+                        // response error
+                        console.log(second_prime_response.status, " ", second_prime_response.text())
+                    }
+                }
+                                                                                                
             } catch (parseError) {
                 /* the more errors you get the smarter you are */
                 console.error('Failed to parse 520 response:', parseError);
             }
-        } else if (response.ok) {
+        } else if (prime_response.ok) {
             console.log('write successful')
             document.getElementById('error_panel').textContent = 'success';
-        } else if (!response.ok) {
-            console.log('Response status error', response.status, response.text());  
+        } else if (!prime_response.ok) {
+            console.log('Response status error', prime_response.status, prime_response.text());  
             document.getElementById('error_panel').textContent = 'error';
-            document.getElementById('error_panel').textContent = response.text();
+            document.getElementById('error_panel').textContent = prime_response.text();
         } else {
             /* the more errors you get the smarter you are */
             throw new error('unknown error');
