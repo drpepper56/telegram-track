@@ -271,13 +271,19 @@ async function send_data() {
                 let message = data?.['expected error'] ?? data?.expected_error ?? null;
                 console.log(message)
 
+                const user_details = get_user_details()
+
+                console.log('user_details', user_details);
+                console.log('from function', get_user_details());
+                
+
                 // send request to create the user                                                             
                 // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
                 const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
                     method: 'post',
                     mode: 'cors',
                     headers: headers,
-                    body: JSON.stringify(get_user_details())
+                    body: JSON.stringify(user_details)
                 });
 
                 if(create_user_response.ok) {
