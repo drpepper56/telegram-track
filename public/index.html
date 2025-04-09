@@ -31,15 +31,31 @@
             </li>
         </ul>
 
-        <input type="text" id="test_textbox_key">
-            balls
-        </input>
-        <input type="text" id="test_textbox_value">
-            balls
-        </input>
-        <button id="submit_button" onclick="send_data();">
-            send data to save in db TESTING
-        </button>
+        <!-- test write to db -->
+        <div>
+            <input type="text" id="test_textbox_key">
+                balls
+            </input>
+            <input type="text" id="test_textbox_value">
+                balls
+            </input>
+            <button id="submit_button" onclick="send_data();">
+                send data to save in db TESTING
+            </button>
+        </div>
+
+        <!-- test register tracking number with user auth -->
+        <div>
+            <input type="text" id="tracking_number">
+                balls
+            </input>
+            <input type="text" id="carrier_text">
+                balls
+            </input>
+            <button id="register_number_button" onclick="register_one_tracking_number();">
+                send data to save in db TESTING
+            </button>
+        </div>
 
         <label id="error_panel"></label>
 
