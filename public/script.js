@@ -58,7 +58,6 @@ async function get_user_id_hash() {
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        console.log('Hash:', hashHex);
         return hashHex; 
     } catch (error) {
         console.error('Error generating hash:', error);
@@ -265,18 +264,13 @@ async function send_data() {
 
         if (prime_response.status == 520) {
         // user doesn't exist yet
+        console.log("USER DOESN'T EXIST YET");
             try {
                 // read the body of the user not existing error
-                console.log("USER DOESN'T EXIST YET");
                 data = await prime_response.json();
                 // DO NOT DISTURB
-                // let message = data?.['expected error'] ?? data?.expected_error ?? null;
-                // console.log(message)
-
-                const user_details = await get_user_details();
-
-                console.log('user_details', user_details);
-                console.log('from function', await get_user_details());
+                let message = data?.['expected error'] ?? data?.expected_error ?? null;
+                console.log(message)
                 
 
                 // send request to create the user                                                             
@@ -289,12 +283,16 @@ async function send_data() {
                 });
 
                 if(create_user_response.ok) {
+                    console.log('user created')
+                    console.log('recycling prime message now...')
                     // resend primary message
-                    const second_prime_response = await prime_message;
+                    const second_prime_response = await prime_message.clone();
+                    console.log('prime sent successfully')
                     if(second_prime_response.ok) {
                         // write successful
                         console.log("WRITE GOOD AND USER CREATED")
                     } else {
+                        console.log("recycled prime message response is not ok")
                         // response error
                         console.log(second_prime_response.status, " ", second_prime_response.text())
                     }
