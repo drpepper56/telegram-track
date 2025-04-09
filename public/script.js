@@ -234,6 +234,7 @@ async function register_one_tracking_number() {
         "carrier": document.getElementById('carrier_text').value
     };
     const user_id_hash = await get_user_id_hash();
+    console.log(prime_json_data)
 
     try {
 
