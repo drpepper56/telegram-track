@@ -231,7 +231,7 @@ async function register_one_tracking_number() {
     // create the json to send as payload
     const prime_json_data = {
         "tracking_number": document.getElementById('tracking_number').value,
-        "carrier": document.getElementById('carrier_text').value
+        "carrier": Number(document.getElementById('carrier_text').value)
     };
     const user_id_hash = await get_user_id_hash();
     console.log(prime_json_data)
