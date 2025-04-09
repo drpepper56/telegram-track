@@ -66,6 +66,16 @@ async function get_user_id_hash() {
     }
 }
 
+function get_user_details() {
+
+    const user_details = {
+        "user_id": Telegram.WebApp.initDataUnsafe.user.id.toString(),
+        "first_name": Telegram.WebApp.initDataUnsafe.user.first_name
+    }
+
+    return user_details;
+}
+
 
 
 /*
@@ -220,7 +230,7 @@ garbage end
 // test connection on database through server to write something into the db and get confirmation here
 async function send_data() {
     // create the json to send as payload
-    const json_data = {
+    const prime_json_data = {
         "key": document.getElementById('test_textbox_key').value,
         "value": document.getElementById('test_textbox_value').value
     };
@@ -243,7 +253,7 @@ async function send_data() {
             method: 'post',
             mode: 'cors',
             headers: headers,
-            body: JSON.stringify(json_data)
+            body: JSON.stringify(prime_json_data)
         });
 
         // send the primary message
@@ -267,7 +277,7 @@ async function send_data() {
                     method: 'post',
                     mode: 'cors',
                     headers: headers,
-                    body: JSON.stringify(json_data)
+                    body: JSON.stringify(get_user_details())
                 });
 
                 if(create_user_response.ok) {
