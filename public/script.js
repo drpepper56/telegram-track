@@ -272,9 +272,9 @@ async function send_data() {
                 let message = data?.['expected error'] ?? data?.expected_error ?? null;
                 console.log(message)
 
+                // create the json for user details
                 const user_details = await get_user_details();
                 
-
                 // send request to create the user                                                             
                 // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
                 const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
@@ -288,7 +288,7 @@ async function send_data() {
                     console.log('user created')
                     console.log('recycling prime message now...')
                     // resend primary message
-                    const second_prime_response = await prime_message.clone();
+                    const second_prime_response = await prime_message;
                     console.log('prime sent successfully')
                     if(second_prime_response.ok) {
                         // write successful
