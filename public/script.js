@@ -66,11 +66,12 @@ async function get_user_id_hash() {
     }
 }
 
-function get_user_details() {
+async function get_user_details() {
 
     const user_details = {
         "user_id": Telegram.WebApp.initDataUnsafe.user.id.toString(),
-        "first_name": Telegram.WebApp.initDataUnsafe.user.first_name
+        "user_name": Telegram.WebApp.initDataUnsafe.user.first_name,
+        "user_id_hash": await get_user_id_hash()
     }
 
     return user_details;
@@ -271,10 +272,10 @@ async function send_data() {
                 let message = data?.['expected error'] ?? data?.expected_error ?? null;
                 console.log(message)
 
-                const user_details = get_user_details()
+                const user_details = await get_user_details()
 
                 console.log('user_details', user_details);
-                console.log('from function', get_user_details());
+                console.log('from function', await get_user_details());
                 
 
                 // send request to create the user                                                             
