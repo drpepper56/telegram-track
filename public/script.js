@@ -248,16 +248,13 @@ async function send_data() {
             'X-User-ID-Hash': user_id_hash
         }
 
-        // save the primary message
-        const prime_message = fetch(BACKEND_LINK + '/write', {
+        // send the primary message
+        const prime_response = await fetch(BACKEND_LINK + '/write', {
             method: 'post',
             mode: 'cors',
             headers: headers,
             body: JSON.stringify(prime_json_data)
-        });
-
-        // send the primary message
-        const prime_response = await prime_message;
+        });;
 
         // /* the more errors you get the smarter you are */
         // const responseClone = response.clone();
@@ -288,8 +285,14 @@ async function send_data() {
                     console.log('user created')
                     console.log('recycling prime message now...')
                     // resend primary message
-                    const second_prime_response = await prime_message;
-                    console.log('prime sent successfully')
+                    const second_prime_response = await fetch(BACKEND_LINK + '/write', {
+                        method: 'post',
+                        mode: 'cors',
+                        headers: headers,
+                        body: JSON.stringify(prime_json_data)
+                    });
+                    console.log('second prime sent successfully');
+
                     if(second_prime_response.ok) {
                         // write successful
                         console.log("WRITE GOOD AND USER CREATED")
