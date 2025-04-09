@@ -295,8 +295,11 @@ async function send_data() {
                         console.log("WRITE GOOD AND USER CREATED")
                     } else {
                         console.log("recycled prime message response is not ok")
+                        response = await second_prime_response.json();
+                        console.log(response)
+                        
                         // response error
-                        console.log(second_prime_response.status, " ", second_prime_response.text())
+                        console.log(response.status, " ", response.text())
                     }
                 }
                                                                                                 
