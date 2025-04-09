@@ -269,10 +269,11 @@ async function send_data() {
                 // read the body of the user not existing error
                 console.log("USER DOESN'T EXIST YET");
                 data = await prime_response.json();
-                let message = data?.['expected error'] ?? data?.expected_error ?? null;
-                console.log(message)
+                // DO NOT DISTURB
+                // let message = data?.['expected error'] ?? data?.expected_error ?? null;
+                // console.log(message)
 
-                const user_details = await get_user_details()
+                const user_details = await get_user_details();
 
                 console.log('user_details', user_details);
                 console.log('from function', await get_user_details());
