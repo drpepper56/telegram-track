@@ -271,6 +271,8 @@ async function send_data() {
                 // DO NOT DISTURB
                 let message = data?.['expected error'] ?? data?.expected_error ?? null;
                 console.log(message)
+
+                const user_details = await get_user_details();
                 
 
                 // send request to create the user                                                             
