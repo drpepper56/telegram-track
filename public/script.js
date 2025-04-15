@@ -251,7 +251,7 @@ async function register_one_tracking_number() {
             mode: 'cors',
             headers: headers,
             body: JSON.stringify(prime_json_data)
-        });;
+        });
 
         // /* the more errors you get the smarter you are */
         // const responseClone = response.clone();
@@ -353,7 +353,7 @@ async function send_data() {
             mode: 'cors',
             headers: headers,
             body: JSON.stringify(prime_json_data)
-        });;
+        });
 
         // /* the more errors you get the smarter you are */
         // const responseClone = response.clone();
