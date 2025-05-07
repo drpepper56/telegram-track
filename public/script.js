@@ -105,7 +105,6 @@ function notify(payload) {
     try {
         update_package_objetto = JSON.parse(payload);
     } catch (e) {
-        document.getElementById("update-box").textContent = value1;
         console.log('porco dio javascripto', e);
         throw e;
     }  
