@@ -100,7 +100,7 @@ clean everything down there too much testing going on
 */
 
 // show the stuff from the notification in the dom
-function notify(value1) {  
+function notify(payload) {  
     let update_package_objetto;
     try {
         update_package_objetto = JSON.parse(payload);
