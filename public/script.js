@@ -37,7 +37,8 @@ function notification_handler() {
         const urlDecoded = decodeURIComponent(encodedParam);
         const base64Decoded = atob(urlDecoded.replace(/-/g, '+').replace(/_/g, '/'));
         const decodedData = JSON.parse(base64Decoded);
-        notify(decodedData.balls, decodedData.balls2);
+        // get the tracking package data, hello javascript
+        notify(decodedData.package_update);
     } catch (e) {
         console.error("Error parsing start param:", e);
     }
@@ -99,10 +100,13 @@ clean everything down there too much testing going on
 */
 
 // show the stuff from the notification in the dom
-function notify(value1, value2) {    
-    document.getElementById("parameter1").textContent = value1;
-    document.getElementById("parameter2").textContent = value2;
-    
+function notify(value1) {  
+    try {
+        update_package_objetto = JSON.parse(payload)
+    } catch (e) {
+        document.getElementById("parameter1").textContent = value1;
+    }  
+    document.getElementById("parameter1").innerText = JSON.stringify(updateObj, null, 2);
 }
 
 
