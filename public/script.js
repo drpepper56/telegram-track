@@ -104,9 +104,11 @@ function notify(value1) {
     try {
         update_package_objetto = JSON.parse(payload)
     } catch (e) {
-        document.getElementById("parameter1").textContent = value1;
+        document.getElementById("update-box").textContent = value1;
+        console.log('porco dio javascripto');
     }  
-    document.getElementById("parameter1").innerText = JSON.stringify(updateObj, null, 2);
+    console.log(JSON.stringify(update_package_objetto, null, 2));
+    document.getElementById("update-box").innerText = JSON.stringify(update_package_objetto, null, 2);
 }
 
 
