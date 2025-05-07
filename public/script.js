@@ -38,6 +38,8 @@ function notification_handler() {
         const base64Decoded = atob(urlDecoded.replace(/-/g, '+').replace(/_/g, '/'));
         const decodedData = JSON.parse(base64Decoded);
         // get the tracking package data, hello javascript
+        console.log(decodedData.package_update);
+        console.log(decodedData);
         notify(decodedData.package_update);
     } catch (e) {
         console.error("Error parsing start param:", e);
