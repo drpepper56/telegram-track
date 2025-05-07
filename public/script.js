@@ -101,11 +101,13 @@ clean everything down there too much testing going on
 
 // show the stuff from the notification in the dom
 function notify(value1) {  
+    let update_package_objetto;
     try {
-        update_package_objetto = JSON.parse(payload)
+        update_package_objetto = JSON.parse(payload);
     } catch (e) {
         document.getElementById("update-box").textContent = value1;
-        console.log('porco dio javascripto');
+        console.log('porco dio javascripto', e);
+        throw e;
     }  
     console.log(JSON.stringify(update_package_objetto, null, 2));
     document.getElementById("update-box").innerText = JSON.stringify(update_package_objetto, null, 2);
