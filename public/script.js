@@ -310,11 +310,11 @@ async function get_tracking_data(tracking_number) {
                         if(second_prime_response.ok) {
                             // write successful
                             console.log(success_mes)
-                        } else {
-                            console.log("recycled prime message response is not ok");
                             response = await second_prime_response.json();
                             console.log(response);
                             notify(response);
+                        } else {
+                            console.log("recycled prime message response is not ok");
                             // response error
                             console.log(response.status, " ", response.text());
                         }
@@ -325,9 +325,12 @@ async function get_tracking_data(tracking_number) {
                     console.error('Failed to parse 520 response:', parseError);
                 }
             } else if (prime_response.ok) {
+                // write successful
                 console.log(success_mes)
+                response = await second_prime_response.json();
+                console.log(response);
                 notify(response);
-                document.getElementById('error_panel').textContent = 'success';
+                console.log(response.status, " ", response.text());
             } else if (!prime_response.ok) {
                 console.log('Response status error', prime_response.status, prime_response.text());  
                 document.getElementById('error_panel').textContent = 'error';
