@@ -106,16 +106,16 @@ clean everything down there too much testing going on
 
 // show the stuff from the notification in the dom
 function notify(payload) {  
-    let update_package_objetto;
+    // let update_package_objetto;
     console.log("the thing: " + payload);
-    try {
-        update_package_objetto = JSON.parse(payload);
-    } catch (e) {
-        console.log('porco dio javascripto', e);
-        throw e;
-    }  
-    console.log(JSON.stringify(update_package_objetto, null, 2));
-    document.getElementById("update-box").innerText = JSON.stringify(update_package_objetto, null, 2);
+    // try {
+    //     update_package_objetto = JSON.parse(payload);
+    // } catch (e) {
+    //     console.log('porco dio javascripto', e);
+    //     throw e;
+    // }  
+    console.log(JSON.stringify(payload, null, 2));
+    document.getElementById("update-box").innerText = JSON.stringify(payload, null, 2);
 }
 
 
