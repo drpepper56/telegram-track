@@ -40,6 +40,9 @@ function notification_handler() {
         // get the tracking package data number
         console.log(decodedData.package_update);
 
+        // request the tracking data
+        get_tracking_data(decodedData.package_update);
+
         // notify(decodedData.package_update);
     } catch (e) {
         console.error("Error parsing start param:", e);
