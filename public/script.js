@@ -310,7 +310,7 @@ async function get_tracking_data(tracking_number) {
                         if(second_prime_response.ok) {
                             // write successful
                             console.log(success_mes)
-                            response = await second_prime_response.json();
+                            let response = await second_prime_response.json();
                             console.log(response);
                             notify(response);
                         } else {
@@ -327,7 +327,7 @@ async function get_tracking_data(tracking_number) {
             } else if (prime_response.ok) {
                 // write successful
                 console.log(success_mes)
-                response = await second_prime_response.json();
+                let response = await second_prime_response.json();
                 console.log(response);
                 notify(response);
                 console.log(response.status, " ", response.text());
