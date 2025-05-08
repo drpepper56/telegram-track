@@ -104,6 +104,7 @@ clean everything down there too much testing going on
 // show the stuff from the notification in the dom
 function notify(payload) {  
     let update_package_objetto;
+    console.log("the thing: " + payload);
     try {
         update_package_objetto = JSON.parse(payload);
     } catch (e) {
