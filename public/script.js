@@ -245,7 +245,7 @@ garbage end
 async function get_tracking_data(tracking_number) {
         // create the json to send as payload
         const prime_json_data = {
-            "tracking_number": tracking_number
+            "number": tracking_number
         };
         const user_id_hash = await get_user_id_hash();
 
