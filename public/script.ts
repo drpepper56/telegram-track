@@ -34,7 +34,7 @@ function notification_handler() {
         // json -> base64 -> json decoding pogchamp
         const urlParams = new URLSearchParams(startParam);
         const encodedParam = urlParams.get('tgWebAppStartParam'); 
-        const urlDecoded = decodeURIComponent(encodedParam);
+        const urlDecoded = decodeURIComponent(encodedParam!);
         const base64Decoded = atob(urlDecoded.replace(/-/g, '+').replace(/_/g, '/'));
         const decodedData = JSON.parse(base64Decoded);
         // get the tracking package data number
@@ -60,7 +60,7 @@ async function get_user_id_hash() {
     }
     try {
         const encoder = new TextEncoder();
-        const data = encoder.encode(Telegram.WebApp.initDataUnsafe.user.id.toString());
+        const data = encoder.encode(Telegram.WebApp.initDataUnsafe.user!.id.toString());
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -75,8 +75,8 @@ async function get_user_id_hash() {
 async function get_user_details() {
 
     const user_details = {
-        "user_id": Telegram.WebApp.initDataUnsafe.user.id,
-        "user_name": Telegram.WebApp.initDataUnsafe.user.first_name,
+        "user_id": Telegram.WebApp.initDataUnsafe.user!.id,
+        "user_name": Telegram.WebApp.initDataUnsafe.user!.first_name,
         "user_id_hash": await get_user_id_hash()
     }
 
@@ -111,7 +111,8 @@ async function create_user_request(headers, prime_path, prime_json_data) {
             if(second_prime_response.ok) {
                 return second_prime_response;
             } else {
-                throw new Error("second prime response failed when after creating the user", response.status, " ", response.text())
+                throw new Error("second prime response failed when after creating the user" + 
+                    second_prime_response.status + " " + second_prime_response.text())
             }
         }
                                                                                         
@@ -166,7 +167,7 @@ async function get_tracking_data(tracking_number) {
             console.log("USER DOESN'T EXIST YET");
             const second_prime_response = create_user_request(headers,path,prime_json_data);
             // user created, second response successful
-            const response_json = await second_prime_response.json();
+            const response_json = await second_prime_response.then((json) => json).catch((err) => console.log(err));
             notify(response_json);
                     
         } else if (prime_response.ok) {
@@ -178,11 +179,10 @@ async function get_tracking_data(tracking_number) {
             console.log(response.status, " ", response.text());
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.text());  
-            document.getElementById('error_panel').textContent = 'error';
-            document.getElementById('error_panel').textContent = prime_response.text();
+            document.getElementById('error_panel')!.textContent = 'error';
         } else {
             /* the more errors you get the smarter you are */
-            throw new error('unknown error');
+            throw new Error('unknown error');
         }
           
     
@@ -197,8 +197,8 @@ async function get_tracking_data(tracking_number) {
 async function register_one_tracking_number() {
     // create the json to send as payload
     const prime_json_data = {
-        "number": document.getElementById('tracking_number').value,
-        "carrier": Number(document.getElementById('carrier_text').value)
+        "number": document.getElementById('tracking_number')!.textContent,
+        "carrier": Number(document.getElementById('carrier_text')!.textContent)
     };
     const path = '/register_tracking_number'
     const user_id_hash = await get_user_id_hash();
@@ -228,19 +228,18 @@ async function register_one_tracking_number() {
             // user doesn't exist yet, call to create user, then retry the original call
             const second_prime_response = create_user_request(headers,path,prime_json_data);
             // user created, second response successful
-            const response_json = await second_prime_response.json();
+            const response_json = await second_prime_response.then((json) => json).catch((err) => console.log(err));
             console.log(response_json)
             console.log("registered the number successfully")
         } else if (prime_response.ok) {
             console.log('write successful')
-            document.getElementById('error_panel').textContent = 'success';
+            document.getElementById('error_panel')!.textContent = 'success';
         } else if (!prime_response.ok) {
-            console.log('Response status error', prime_response.status, prime_response.text());  
-            document.getElementById('error_panel').textContent = 'error';
-            document.getElementById('error_panel').textContent = prime_response.text();
+            console.log('Response status error', prime_response.status, prime_response.json());  
+            document.getElementById('error_panel')!.textContent = 'error';
         } else {
             /* the more errors you get the smarter you are */
-            throw new error('unknown error');
+            throw new Error('unknown error');
         }
         
 
@@ -248,108 +247,6 @@ async function register_one_tracking_number() {
             /* the more errors you get the smarter you are */   
             console.log('some other error:', error);
     }; 
-}
-
-// test connection on database through server to write something into the db and get confirmation here
-async function send_data() {
-// create the json to send as payload
-const prime_json_data = {
-    "key": document.getElementById('test_textbox_key').value,
-    "value": document.getElementById('test_textbox_value').value
-};
-const user_id_hash = await get_user_id_hash();
-
-
-// curl -X POST -H "Content-Type: application/json" -d '{"key": "balls", "value": "balls"}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
-
-try {
-
-    // headers
-    const headers = {
-        'Content-Type': 'application/json',
-        'Origin': window.location.origin,
-        'X-User-ID-Hash': user_id_hash
-    }
-
-    // send the primary message
-    const prime_response = await fetch(BACKEND_LINK + '/write', {
-        method: 'post',
-        mode: 'cors',
-        headers: headers,
-        body: JSON.stringify(prime_json_data)
-    });
-
-    // /* the more errors you get the smarter you are */
-    // const responseClone = response.clone();
-
-    if (prime_response.status == 520) {
-    // user doesn't exist yet
-    console.log("USER DOESN'T EXIST YET");
-        try {
-            // read the body of the user not existing error
-            data = await prime_response.json();
-            // DO NOT DISTURB
-            let message = data?.['expected error'] ?? data?.expected_error ?? null;
-            console.log(message)
-
-            // create the json for user details
-            const user_details = await get_user_details();
-            
-            // send request to create the user                                                             
-            // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
-            const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
-                method: 'post',
-                mode: 'cors',
-                headers: headers,
-                body: JSON.stringify(user_details)
-            });
-
-            if(create_user_response.ok) {
-                console.log('user created')
-                console.log('recycling prime message now...')
-                // resend primary message
-                const second_prime_response = await fetch(BACKEND_LINK + '/write', {
-                    method: 'post',
-                    mode: 'cors',
-                    headers: headers,
-                    body: JSON.stringify(prime_json_data)
-                });
-                console.log('second prime sent successfully');
-
-                if(second_prime_response.ok) {
-                    // write successful
-                    console.log("WRITE GOOD AND USER CREATED")
-                } else {
-                    console.log("recycled prime message response is not ok")
-                    response = await second_prime_response.json();
-                    console.log(response)
-                    
-                    // response error
-                    console.log(response.status, " ", response.text())
-                }
-            }
-                                                                                            
-        } catch (parseError) {
-            /* the more errors you get the smarter you are */
-            console.error('Failed to parse 520 response:', parseError);
-        }
-    } else if (prime_response.ok) {
-        console.log('write successful')
-        document.getElementById('error_panel').textContent = 'success';
-    } else if (!prime_response.ok) {
-        console.log('Response status error', prime_response.status, prime_response.text());  
-        document.getElementById('error_panel').textContent = 'error';
-        document.getElementById('error_panel').textContent = prime_response.text();
-    } else {
-        /* the more errors you get the smarter you are */
-        throw new error('unknown error');
-    }
-      
-
-    } catch (error) {
-        /* the more errors you get the smarter you are */   
-        console.log('some other error:', error);
-};
 }
 
 
@@ -384,7 +281,7 @@ function notify(payload) {
     //     throw e;
     // }  
     console.log(JSON.stringify(payload, null, 2));
-    document.getElementById("update-box").innerText = JSON.stringify(payload, null, 2);
+    document.getElementById("update-box")!.innerText = JSON.stringify(payload, null, 2);
 }
 
 
@@ -400,7 +297,7 @@ Telegram.WebApp.MainButton.setParams({
 });
 
 Telegram.WebApp.MainButton.onClick(function () {
-    updateLabel('Refreshing...');
+    console.log("aaaAAAaa")
 });	
 
 Telegram.WebApp.MainButton.show();
@@ -430,19 +327,8 @@ function toggleMainButton() {
     }
 };
 
-function setViewportData() {
-    var sizeEl = document.getElementById('viewport-params-size');
-    sizeEl.innerText = 'width: ' + window.innerWidth + ' x ' + 
-        'height: ' + Telegram.WebApp.viewportStableHeight;
-
-    var expandEl = document.querySelector('#viewport-params-expand');
-    expandEl.innerText = 'Is Expanded: ' + (Telegram.WebApp.isExpanded ? 'true' : 'false');
-}
 
 Telegram.WebApp.setHeaderColor('secondary_bg_color');
-
-setViewportData();
-Telegram.WebApp.onEvent('viewportChanged', setViewportData);
 
 Telegram.WebApp.onEvent('themeChanged', function() {
     document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
@@ -455,8 +341,8 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    const statusLabel = document.getElementById('statusLabel');
-    const refreshBtn = document.getElementById('refreshBtn');
+    const statusLabel = document.getElementById('statusLabel')!;
+    const refreshBtn = document.getElementById('refreshBtn')!;
     
     // Function to update label
     function updateLabel(text) {
