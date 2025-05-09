@@ -193,10 +193,11 @@ async function get_tracking_data(tracking_number) {
 
 }
 
+// TODO: test this later iykyk
 async function register_one_tracking_number() {
     // create the json to send as payload
     const prime_json_data = {
-        "tracking_number": document.getElementById('tracking_number').value,
+        "number": document.getElementById('tracking_number').value,
         "carrier": Number(document.getElementById('carrier_text').value)
     };
     const path = '/register_tracking_number'
