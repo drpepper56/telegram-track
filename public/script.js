@@ -71,6 +71,7 @@ async function get_user_id_hash() {
     }
 }
 
+/// function for getting user details to be send when registering
 async function get_user_details() {
 
     const user_details = {
@@ -82,6 +83,273 @@ async function get_user_details() {
     return user_details;
 }
 
+/// Function for creating a user and resending a request if the user has been created
+async function create_user_request(headers, prime_path, prime_json_data) {
+    console.log("USER DOESN'T EXIST YET");
+    try {
+        // create the json for user details
+        const user_details = await get_user_details();
+        
+        // send request to create the user                                                             
+        // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
+        const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
+            method: 'post',
+            mode: 'cors',
+            headers,
+            body: JSON.stringify(user_details)
+        });
+
+        if(create_user_response.ok) {
+            // resend primary message
+            const second_prime_response = await fetch(BACKEND_LINK + prime_path, {
+                method: 'post',
+                mode: 'cors',
+                headers,
+                body: JSON.stringify(prime_json_data)
+            });
+
+            if(second_prime_response.ok) {
+                return second_prime_response;
+            } else {
+                throw new Error("second prime response failed when after creating the user", response.status, " ", response.text())
+            }
+        }
+                                                                                        
+    } catch (parseError) {
+        /* the more errors you get the smarter you are */
+        console.error('Failed to parse 520 response:', parseError);
+        throw parseError
+    }
+}
+
+
+
+/*
+    ONLY KNOWN WAY TO SEND REQUESTS TO THE SERVER
+*/
+
+/// Function for sending a request for tracking data of a number, assume it's already registered
+/// and the user has permissions to it, call after a notification or when accessing the tracking page
+async function get_tracking_data(tracking_number) {
+    // create the json to send as payload
+    const prime_json_data = {
+        "number": tracking_number
+    };
+    const user_id_hash = await get_user_id_hash();
+
+    try {
+
+        // headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin,
+            'X-User-ID-Hash': user_id_hash
+        }
+
+
+        const path = '/get_tracking_data'
+        const success_mes = 'tracking data retrieved successfully'
+
+        // send the primary message
+        const prime_response = await fetch(BACKEND_LINK + path, {
+            method: 'post',
+            mode: 'cors',
+            headers: headers,
+            body: JSON.stringify(prime_json_data)
+        });
+
+        // /* the more errors you get the smarter you are */
+        // const responseClone = response.clone();
+
+        if (prime_response.status == 520) {
+            // user doesn't exist yet, call to create user, then retry the original call
+            console.log("USER DOESN'T EXIST YET");
+            const second_prime_response = create_user_request(headers,path,prime_json_data);
+            // user created, second response successful
+            const response_json = await second_prime_response.json();
+            notify(response_json);
+                    
+        } else if (prime_response.ok) {
+            // write successful
+            console.log(success_mes)
+            let response = await prime_response.json();
+            console.log(response);
+            notify(response);
+            console.log(response.status, " ", response.text());
+        } else if (!prime_response.ok) {
+            console.log('Response status error', prime_response.status, prime_response.text());  
+            document.getElementById('error_panel').textContent = 'error';
+            document.getElementById('error_panel').textContent = prime_response.text();
+        } else {
+            /* the more errors you get the smarter you are */
+            throw new error('unknown error');
+        }
+          
+    
+        } catch (error) {
+            /* the more errors you get the smarter you are */   
+            console.log('some other error:', error);
+    }; 
+
+}
+
+async function register_one_tracking_number() {
+    // create the json to send as payload
+    const prime_json_data = {
+        "tracking_number": document.getElementById('tracking_number').value,
+        "carrier": Number(document.getElementById('carrier_text').value)
+    };
+    const path = '/register_tracking_number'
+    const user_id_hash = await get_user_id_hash();
+    console.log(prime_json_data)
+
+    try {
+
+        // headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin,
+            'X-User-ID-Hash': user_id_hash
+        }
+
+        // send the primary message
+        const prime_response = await fetch(BACKEND_LINK + path, {
+            method: 'post',
+            mode: 'cors',
+            headers,
+            body: JSON.stringify(prime_json_data)
+        });
+
+        // /* the more errors you get the smarter you are */
+        // const responseClone = response.clone();
+
+        if (prime_response.status == 520) {
+            // user doesn't exist yet, call to create user, then retry the original call
+            const second_prime_response = create_user_request(headers,path,prime_json_data);
+            // user created, second response successful
+            const response_json = await second_prime_response.json();
+            console.log(response_json)
+            console.log("registered the number successfully")
+        } else if (prime_response.ok) {
+            console.log('write successful')
+            document.getElementById('error_panel').textContent = 'success';
+        } else if (!prime_response.ok) {
+            console.log('Response status error', prime_response.status, prime_response.text());  
+            document.getElementById('error_panel').textContent = 'error';
+            document.getElementById('error_panel').textContent = prime_response.text();
+        } else {
+            /* the more errors you get the smarter you are */
+            throw new error('unknown error');
+        }
+        
+
+        } catch (error) {
+            /* the more errors you get the smarter you are */   
+            console.log('some other error:', error);
+    }; 
+}
+
+// test connection on database through server to write something into the db and get confirmation here
+async function send_data() {
+// create the json to send as payload
+const prime_json_data = {
+    "key": document.getElementById('test_textbox_key').value,
+    "value": document.getElementById('test_textbox_value').value
+};
+const user_id_hash = await get_user_id_hash();
+
+
+// curl -X POST -H "Content-Type: application/json" -d '{"key": "balls", "value": "balls"}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
+
+try {
+
+    // headers
+    const headers = {
+        'Content-Type': 'application/json',
+        'Origin': window.location.origin,
+        'X-User-ID-Hash': user_id_hash
+    }
+
+    // send the primary message
+    const prime_response = await fetch(BACKEND_LINK + '/write', {
+        method: 'post',
+        mode: 'cors',
+        headers: headers,
+        body: JSON.stringify(prime_json_data)
+    });
+
+    // /* the more errors you get the smarter you are */
+    // const responseClone = response.clone();
+
+    if (prime_response.status == 520) {
+    // user doesn't exist yet
+    console.log("USER DOESN'T EXIST YET");
+        try {
+            // read the body of the user not existing error
+            data = await prime_response.json();
+            // DO NOT DISTURB
+            let message = data?.['expected error'] ?? data?.expected_error ?? null;
+            console.log(message)
+
+            // create the json for user details
+            const user_details = await get_user_details();
+            
+            // send request to create the user                                                             
+            // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
+            const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
+                method: 'post',
+                mode: 'cors',
+                headers: headers,
+                body: JSON.stringify(user_details)
+            });
+
+            if(create_user_response.ok) {
+                console.log('user created')
+                console.log('recycling prime message now...')
+                // resend primary message
+                const second_prime_response = await fetch(BACKEND_LINK + '/write', {
+                    method: 'post',
+                    mode: 'cors',
+                    headers: headers,
+                    body: JSON.stringify(prime_json_data)
+                });
+                console.log('second prime sent successfully');
+
+                if(second_prime_response.ok) {
+                    // write successful
+                    console.log("WRITE GOOD AND USER CREATED")
+                } else {
+                    console.log("recycled prime message response is not ok")
+                    response = await second_prime_response.json();
+                    console.log(response)
+                    
+                    // response error
+                    console.log(response.status, " ", response.text())
+                }
+            }
+                                                                                            
+        } catch (parseError) {
+            /* the more errors you get the smarter you are */
+            console.error('Failed to parse 520 response:', parseError);
+        }
+    } else if (prime_response.ok) {
+        console.log('write successful')
+        document.getElementById('error_panel').textContent = 'success';
+    } else if (!prime_response.ok) {
+        console.log('Response status error', prime_response.status, prime_response.text());  
+        document.getElementById('error_panel').textContent = 'error';
+        document.getElementById('error_panel').textContent = prime_response.text();
+    } else {
+        /* the more errors you get the smarter you are */
+        throw new error('unknown error');
+    }
+      
+
+    } catch (error) {
+        /* the more errors you get the smarter you are */   
+        console.log('some other error:', error);
+};
+}
 
 
 /*
@@ -127,7 +395,7 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 
 // Show main button
 Telegram.WebApp.MainButton.setParams({
-    text: 'tralalero tralala'
+    text: 'add tracking'
 });
 
 Telegram.WebApp.MainButton.onClick(function () {
@@ -236,315 +504,3 @@ garbage end
 */
 
 
-/*
-    ONLY KNOWN WAY TO SEND REQUESTS TO THE SERVER
-*/
-
-/// Function for sending a request for tracking data of a number, assume it's already registered
-/// and the user has permissions to it, call after a notification or when accessing the tracking page
-async function get_tracking_data(tracking_number) {
-        // create the json to send as payload
-        const prime_json_data = {
-            "number": tracking_number
-        };
-        const user_id_hash = await get_user_id_hash();
-
-        try {
-
-            // headers
-            const headers = {
-                'Content-Type': 'application/json',
-                'Origin': window.location.origin,
-                'X-User-ID-Hash': user_id_hash
-            }
-
-
-            const path = '/get_tracking_data'
-            const success_mes = 'tracking data retrieved successfully'
-
-            // send the primary message
-            const prime_response = await fetch(BACKEND_LINK + path, {
-                method: 'post',
-                mode: 'cors',
-                headers: headers,
-                body: JSON.stringify(prime_json_data)
-            });
-    
-            // /* the more errors you get the smarter you are */
-            // const responseClone = response.clone();
-    
-            if (prime_response.status == 520) {
-            // user doesn't exist yet
-            console.log("USER DOESN'T EXIST YET");
-                try {
-                    // read the body of the user not existing error
-                    data = await prime_response.json();
-                    // DO NOT DISTURB
-                    let message = data?.['expected error'] ?? data?.expected_error ?? null;
-                    console.log(message)
-    
-                    // create the json for user details
-                    const user_details = await get_user_details();
-                    
-                    // send request to create the user                                                             
-                    // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
-                    const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
-                        method: 'post',
-                        mode: 'cors',
-                        headers: headers,
-                        body: JSON.stringify(user_details)
-                    });
-    
-                    if(create_user_response.ok) {
-                        console.log('user created')
-                        console.log('recycling prime message now...')
-                        // resend primary message
-                        const second_prime_response = await fetch(BACKEND_LINK + path, {
-                            method: 'post',
-                            mode: 'cors',
-                            headers: headers,
-                            body: JSON.stringify(prime_json_data)
-                        });
-                        console.log('second prime sent successfully');
-    
-                        if(second_prime_response.ok) {
-                            // write successful
-                            console.log(success_mes)
-                            let response = await second_prime_response.json();
-                            console.log(response);
-                            notify(response);
-                        } else {
-                            console.log("recycled prime message response is not ok");
-                            // response error
-                            console.log(response.status, " ", response.text());
-                        }
-                    }
-                                                                                                    
-                } catch (parseError) {
-                    /* the more errors you get the smarter you are */
-                    console.error('Failed to parse 520 response:', parseError);
-                }
-            } else if (prime_response.ok) {
-                // write successful
-                console.log(success_mes)
-                let response = await prime_response.json();
-                console.log(response);
-                notify(response);
-                console.log(response.status, " ", response.text());
-            } else if (!prime_response.ok) {
-                console.log('Response status error', prime_response.status, prime_response.text());  
-                document.getElementById('error_panel').textContent = 'error';
-                document.getElementById('error_panel').textContent = prime_response.text();
-            } else {
-                /* the more errors you get the smarter you are */
-                throw new error('unknown error');
-            }
-              
-        
-            } catch (error) {
-                /* the more errors you get the smarter you are */   
-                console.log('some other error:', error);
-        }; 
-
-}
-
-async function register_one_tracking_number() {
-    // create the json to send as payload
-    const prime_json_data = {
-        "tracking_number": document.getElementById('tracking_number').value,
-        "carrier": Number(document.getElementById('carrier_text').value)
-    };
-    const user_id_hash = await get_user_id_hash();
-    console.log(prime_json_data)
-
-    try {
-
-        // headers
-        const headers = {
-            'Content-Type': 'application/json',
-            'Origin': window.location.origin,
-            'X-User-ID-Hash': user_id_hash
-        }
-
-        // send the primary message
-        const prime_response = await fetch(BACKEND_LINK + '/register_tracking_number', {
-            method: 'post',
-            mode: 'cors',
-            headers: headers,
-            body: JSON.stringify(prime_json_data)
-        });
-
-        // /* the more errors you get the smarter you are */
-        // const responseClone = response.clone();
-
-        if (prime_response.status == 520) {
-        // user doesn't exist yet
-        console.log("USER DOESN'T EXIST YET");
-            try {
-                // read the body of the user not existing error
-                data = await prime_response.json();
-                // DO NOT DISTURB
-                let message = data?.['expected error'] ?? data?.expected_error ?? null;
-                console.log(message)
-
-                // create the json for user details
-                const user_details = await get_user_details();
-                
-                // send request to create the user                                                             
-                // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
-                const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
-                    method: 'post',
-                    mode: 'cors',
-                    headers: headers,
-                    body: JSON.stringify(user_details)
-                });
-
-                if(create_user_response.ok) {
-                    console.log('user created')
-                    console.log('recycling prime message now...')
-                    // resend primary message
-                    const second_prime_response = await fetch(BACKEND_LINK + '/register_tracking_number', {
-                        method: 'post',
-                        mode: 'cors',
-                        headers: headers,
-                        body: JSON.stringify(prime_json_data)
-                    });
-                    console.log('second prime sent successfully');
-
-                    if(second_prime_response.ok) {
-                        // write successful
-                        console.log("WRITE GOOD AND USER CREATED")
-                    } else {
-                        console.log("recycled prime message response is not ok")
-                        response = await second_prime_response.json();
-                        console.log(response)
-                        
-                        // response error
-                        console.log(response.status, " ", response.text())
-                    }
-                }
-                                                                                                
-            } catch (parseError) {
-                /* the more errors you get the smarter you are */
-                console.error('Failed to parse 520 response:', parseError);
-            }
-        } else if (prime_response.ok) {
-            console.log('write successful')
-            document.getElementById('error_panel').textContent = 'success';
-        } else if (!prime_response.ok) {
-            console.log('Response status error', prime_response.status, prime_response.text());  
-            document.getElementById('error_panel').textContent = 'error';
-            document.getElementById('error_panel').textContent = prime_response.text();
-        } else {
-            /* the more errors you get the smarter you are */
-            throw new error('unknown error');
-        }
-          
-    
-        } catch (error) {
-            /* the more errors you get the smarter you are */   
-            console.log('some other error:', error);
-    }; 
-}
-
-// test connection on database through server to write something into the db and get confirmation here
-async function send_data() {
-    // create the json to send as payload
-    const prime_json_data = {
-        "key": document.getElementById('test_textbox_key').value,
-        "value": document.getElementById('test_textbox_value').value
-    };
-    const user_id_hash = await get_user_id_hash();
-    
-
-    // curl -X POST -H "Content-Type: application/json" -d '{"key": "balls", "value": "balls"}' https://teletrack-server-20b6f79a4151.herokuapp.com/write
-
-    try {
-
-        // headers
-        const headers = {
-            'Content-Type': 'application/json',
-            'Origin': window.location.origin,
-            'X-User-ID-Hash': user_id_hash
-        }
-
-        // send the primary message
-        const prime_response = await fetch(BACKEND_LINK + '/write', {
-            method: 'post',
-            mode: 'cors',
-            headers: headers,
-            body: JSON.stringify(prime_json_data)
-        });
-
-        // /* the more errors you get the smarter you are */
-        // const responseClone = response.clone();
-
-        if (prime_response.status == 520) {
-        // user doesn't exist yet
-        console.log("USER DOESN'T EXIST YET");
-            try {
-                // read the body of the user not existing error
-                data = await prime_response.json();
-                // DO NOT DISTURB
-                let message = data?.['expected error'] ?? data?.expected_error ?? null;
-                console.log(message)
-
-                // create the json for user details
-                const user_details = await get_user_details();
-                
-                // send request to create the user                                                             
-                // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
-                const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
-                    method: 'post',
-                    mode: 'cors',
-                    headers: headers,
-                    body: JSON.stringify(user_details)
-                });
-
-                if(create_user_response.ok) {
-                    console.log('user created')
-                    console.log('recycling prime message now...')
-                    // resend primary message
-                    const second_prime_response = await fetch(BACKEND_LINK + '/write', {
-                        method: 'post',
-                        mode: 'cors',
-                        headers: headers,
-                        body: JSON.stringify(prime_json_data)
-                    });
-                    console.log('second prime sent successfully');
-
-                    if(second_prime_response.ok) {
-                        // write successful
-                        console.log("WRITE GOOD AND USER CREATED")
-                    } else {
-                        console.log("recycled prime message response is not ok")
-                        response = await second_prime_response.json();
-                        console.log(response)
-                        
-                        // response error
-                        console.log(response.status, " ", response.text())
-                    }
-                }
-                                                                                                
-            } catch (parseError) {
-                /* the more errors you get the smarter you are */
-                console.error('Failed to parse 520 response:', parseError);
-            }
-        } else if (prime_response.ok) {
-            console.log('write successful')
-            document.getElementById('error_panel').textContent = 'success';
-        } else if (!prime_response.ok) {
-            console.log('Response status error', prime_response.status, prime_response.text());  
-            document.getElementById('error_panel').textContent = 'error';
-            document.getElementById('error_panel').textContent = prime_response.text();
-        } else {
-            /* the more errors you get the smarter you are */
-            throw new error('unknown error');
-        }
-          
-    
-        } catch (error) {
-            /* the more errors you get the smarter you are */   
-            console.log('some other error:', error);
-    };
-}
