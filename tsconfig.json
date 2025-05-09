@@ -1,0 +1,43 @@
+{
+    "compilerOptions": {
+      /* Visit https://aka.ms/tsconfig to read more about this file */
+  
+      /* Language and Environment */
+      "target": "ES2020", // Specify ECMAScript target version
+      "lib": ["DOM", "ES2020"], // Add "DOM" for browser environment, like Telegram Mini App
+  
+      /* Modules */
+      "module": "CommonJS", // Specify module code generation (CommonJS, ESNext, etc.)
+      "rootDir": "./src", // Specify the root directory of input files
+      "resolveJsonModule": true, // Enable importing .json files
+  
+      /* JavaScript Support */
+      "allowJs": true, // Allow JavaScript files to be compiled
+      // "checkJs": true, // Report errors in .js files
+  
+      /* Emit */
+      "outDir": "./dist", // Redirect output structure to the directory
+      "declaration": true, // Generate corresponding '.d.ts' file
+      "sourceMap": true, // Generate source map files for debugging
+  
+      /* Interop Constraints */
+      "esModuleInterop": true, // Enables emit interoperability between CommonJS and ES Modules
+      "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file.
+  
+      /* Type Checking */
+      "strict": true, // Enable all strict type-checking options
+      // "noImplicitAny": true,                 // Raise error on expressions and declarations with an implied 'any' type.
+      // "strictNullChecks": true,              // Enable strict null checks.
+      // "strictFunctionTypes": true,           // Enable strict checking of function types.
+      // "strictBindCallApply": true,           // Enable strict 'bind', 'call', and 'apply' methods on functions.
+      // "strictPropertyInitialization": true,  // Ensure non-undefined class properties are initialized in the constructor.
+      // "noImplicitThis": true,                // Raise error on 'this' expressions with an implied 'any' type.
+      // "alwaysStrict": true,                  // Parse in strict mode and emit "use strict" for each source file.
+  
+      /* Completeness */
+      "skipLibCheck": true // Skip type checking of declaration files
+    },
+    "include": ["src/**/*"], // Specifies an array of filenames or patterns to include in the program
+    "exclude": ["node_modules", "dist", "**/*.spec.ts"] // Specifies an array of filenames or patterns that should be skipped when resolving include
+  }
+  

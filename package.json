@@ -1,12 +1,34 @@
 {
-  "name": "my-app",
+  "name": "telegram-mini-app-typescript",
   "version": "1.0.0",
-  "main": "server.js",
+  "description": "A TypeScript project for a Telegram Mini App",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "deploy": "git add . && git commit -m 'quick heroku deploy' && git push heroku main"
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev:build": "npx tsc -w",
+    "dev:run": "nodemon dist/index.js",
+    "dev": "concurrently \"npm:dev:build\" \"npm:dev:run\"",
+    "lint": "npx eslint . --ext .ts",
+    "format": "npx prettier --write .",
+    "heroku-postbuild": "npm run build"
   },
-  "dependencies": {
-    "express": "^4.18.2"
+  "keywords": [
+    "telegram",
+    "mini-app",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/telegram-web-app": "^7.2.1", 
+    "typescript": "^5.4.5",
+    "nodemon": "^3.1.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0", 
+    "prettier": "^3.2.5",
+    "@typescript-eslint/parser": "^7.9.0",
+    "@typescript-eslint/eslint-plugin": "^7.9.0"
   }
 }
