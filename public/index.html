@@ -14,36 +14,6 @@
 <body>
     </script>
     <main>
-        <h1>Modals</h1>
-        <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
-        <button onclick="showPopup();">Launch Popup</button>
-
-        <h1>Links</h1>
-        <ul>
-            <li>
-                <a href="javascript:Telegram.WebApp.openTelegramLink('https://t.me/trendingapps');">Open link within Telegram</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
-            </li>
-        </ul>
-
-        <!-- test write to db -->
-        <div>
-            <input type="text" id="test_textbox_key">
-                we on ts
-            </input>
-            <input type="text" id="test_textbox_value">
-                we on ts
-            </input>
-            <button id="submit_button" onclick="send_data();">
-                send data to save in db TESTING
-            </button>
-        </div>
-
         <!-- test register tracking number with user auth -->
         <div>
             <input type="text" value="87VY18633903A081" id="tracking_number">
@@ -53,7 +23,7 @@
                 carrier
             </input>
             <button id="register_number_button" onclick="register_one_tracking_number();">
-                register and pull data to db
+                register tracking number for updates
             </button>
         </div>
 
