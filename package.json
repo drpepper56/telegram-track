@@ -4,7 +4,7 @@
   "description": "A TypeScript project for a Telegram Mini App",
   "main": "dist/index.js",
   "scripts": {
-    "build": "npx tsc && npm run build compileTSC",
+    "build": "npx tsc && npm run compileTSC",
     "dev:build": "npx tsc -w",
     "dev:run": "nodemon dist/index.js",
     "dev": "concurrently \"npm:dev:build\" \"npm:dev:run\"",
