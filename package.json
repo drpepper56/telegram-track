@@ -11,7 +11,8 @@
     "lint": "npx eslint . --ext .ts",
     "format": "npx prettier --write .",
     "heroku-postbuild": "npm run build",
-    "deploy": "git add . && git commit -m 'heroku deploy' && git push heroku main"
+    "hd_old": "git add . && git commit -m 'heroku deploy' && git push heroku js_old:main --force",
+    "d_old": "git push heroku js_old:main --force"
   },
   "keywords": [
     "telegram",
