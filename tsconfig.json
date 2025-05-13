@@ -8,7 +8,7 @@
   
       /* Modules */
       "module": "CommonJS", // Specify module code generation (CommonJS, ESNext, etc.)
-      "rootDir": "./src", // Specify the root directory of input files
+      "rootDir": "./", // Specify the root directory of input files
       "resolveJsonModule": true, // Enable importing .json files
   
       /* JavaScript Support */
@@ -37,7 +37,7 @@
       /* Completeness */
       "skipLibCheck": true // Skip type checking of declaration files
     },
-    "include": ["src"], // Specifies an array of filenames or patterns to include in the program
+    "include": ["src", "server.js"], // Specifies an array of filenames or patterns to include in the program
     "exclude": ["node_modules", "dist", "**/*.spec.ts"] // Specifies an array of filenames or patterns that should be skipped when resolving include
   }
   
