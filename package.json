@@ -10,10 +10,7 @@
     "dev:run": "nodemon dist/index.js",
     "lint": "npx eslint . --ext .ts",
     "format": "npx prettier --write .",
-    "heroku-postbuild": "npm run build",
-    "hd_old": "git add . && git commit -m 'heroku deploy' && git push heroku js_old:main --force",
-    "i_love_working_with_branchesLOLXDDDDDDDDDDDDDDD": "git add . && git commit -m 'i love working with branches, so cool' && git push origin js_old && git push heroku js_old:main --force",
-    "d_old": "git push heroku js_old:main --force"
+    "heroku-postbuild": "npm run build"
   },
   "keywords": [
     "telegram",
