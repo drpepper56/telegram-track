@@ -84,7 +84,7 @@ async function get_user_details() {
 }
 
 /// Function for creating a user and resending a request if the user has been created
-async function create_user_request(headers, prime_path, prime_json_data) {
+async function create_user_request(headers: any, prime_path: string, prime_json_data: any) {
     console.log("USER DOESN'T EXIST YET");
     try {
         // create the json for user details
@@ -131,7 +131,7 @@ async function create_user_request(headers, prime_path, prime_json_data) {
 
 /// Function for sending a request for tracking data of a number, assume it's already registered
 /// and the user has permissions to it, call after a notification or when accessing the tracking page
-async function get_tracking_data(tracking_number) {
+async function get_tracking_data(tracking_number: string) {
     // create the json to send as payload
     const prime_json_data = {
         "number": tracking_number
@@ -167,7 +167,7 @@ async function get_tracking_data(tracking_number) {
             console.log("USER DOESN'T EXIST YET");
             const second_prime_response = create_user_request(headers,path,prime_json_data);
             // user created, second response successful
-            const response_json = await second_prime_response.then((json) => json).catch((err) => console.log(err));
+            const response_json = await second_prime_response.then((res) => res!.json()).catch((err) => console.log(err));
             notify(response_json);
                     
         } else if (prime_response.ok) {
@@ -271,7 +271,7 @@ clean everything down there too much testing going on
 */
 
 // show the stuff from the notification in the dom
-function notify(payload) {  
+function notify(payload: JSON) {  
     // let update_package_objetto;
     console.log("the thing: " + payload);
     // try {
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshBtn = document.getElementById('refreshBtn')!;
     
     // Function to update label
-    function updateLabel(text) {
+    function updateLabel(text: string) {
         statusLabel.textContent = text;
     }
     
