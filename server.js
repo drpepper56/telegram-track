@@ -9,16 +9,16 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = Number(process.env.PORT) || 3000;
 
-// idk
-app.use(express.static(path.join(__dirname, 'public')));
-
 // serve the static html
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, './public', 'index.html'));
-});
+app.use(express.static(path.join(__dirname, 'public')));
 
 // serve the build js
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
+
+// idk
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public', 'index.html'));
+});
 
 // start server and bind port
 app.listen(port, () => {
