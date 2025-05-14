@@ -2,7 +2,8 @@
   "name": "telegram-mini-app-typescript",
   "version": "1.0.0",
   "description": "A TypeScript project for a Telegram Mini App",
-  "main": "dist/index.js",
+  "main": "dist/src/script.js",
+  "type": "module",
   "scripts": {
     "build": "npx tsc",
     "dev:build": "npx tsc -w",
