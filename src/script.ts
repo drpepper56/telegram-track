@@ -126,7 +126,7 @@ async function create_user_request(headers: any, prime_path: string, prime_json_
 
 
 /*
-    ONLY KNOWN WAY TO SEND REQUESTS TO THE SERVER
+    API RELATED FUNCTIONS
 */
 
 /// Function for sending a request for tracking data of a number, assume it's already registered
@@ -200,9 +200,10 @@ async function register_one_tracking_number() {
         "number": document.getElementById('tracking_number')!.textContent,
         "carrier": Number(document.getElementById('carrier_text')!.textContent)
     };
-    const path = '/register_tracking_number'
+    console.log(prime_json_data);
+    const path = '/register_tracking_number';
     const user_id_hash = await get_user_id_hash();
-    console.log(prime_json_data)
+    console.log(prime_json_data);
 
     try {
 
