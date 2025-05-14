@@ -7,7 +7,6 @@
     "build": "npx tsc",
     "dev:build": "npx tsc -w",
     "dev:run": "nodemon dist/index.js",
-    "dev": "concurrently \"npm:dev:build\" \"npm:dev:run\"",
     "lint": "npx eslint . --ext .ts",
     "format": "npx prettier --write .",
     "heroku-postbuild": "npm run build",

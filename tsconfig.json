@@ -37,7 +37,7 @@
       /* Completeness */
       "skipLibCheck": true // Skip type checking of declaration files
     },
-    "include": ["server.js"], // Specifies an array of filenames or patterns to include in the program
+    "include": ["server.js", "src/**/*.ts"], // Specifies an array of filenames or patterns to include in the program
     "exclude": ["node_modules", "dist", "**/*.spec.ts"] // Specifies an array of filenames or patterns that should be skipped when resolving include
   }
   
