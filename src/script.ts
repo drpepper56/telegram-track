@@ -48,8 +48,8 @@ async function initApp() {
     tg.MainButton.onClick(showAddTrackingDialog);
     tg.MainButton.show();
     
-    await loadTrackedPackages();
-    renderTrackingList();
+    // await loadTrackedPackages();
+    // renderTrackingList();
 }
 
 /*
@@ -155,9 +155,9 @@ async function create_user_request(headers: any, prime_path: string, prime_json_
 /// Back to main view
 function backToMainView(): void {
     currentView = 'main';
-    mainView.style.display = 'block';
-    detailsView.style.display = 'none';
-    currentTrackingNumber = null;
+    // mainView.style.display = 'block';
+    // detailsView.style.display = 'none';
+    // currentTrackingNumber = null;
 }
 
 /*
@@ -255,7 +255,7 @@ function showAddTrackingDialog(): void {
         }
         
         document.body.removeChild(modal);
-        addTrackingNumber(trackingNumber);
+        register_one_tracking_number(trackingNumber);
     });
     
     // Focus input when modal appears
@@ -340,11 +340,11 @@ async function get_tracking_data(tracking_number: string) {
 }
 
 // TODO: test this later iykyk
-async function register_one_tracking_number() {
+async function register_one_tracking_number(tracking_number: string) {
     // create the json to send as payload
     const prime_json_data = {
-        "number": (document.getElementById('tracking_number') as HTMLInputElement).value,
-        "carrier": Number((document.getElementById('carrier_text') as HTMLInputElement).value)
+        "number": tracking_number,
+        "carrier": Number(null)
     };
     console.log(prime_json_data);
     const path = '/register_tracking_number';
