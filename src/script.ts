@@ -166,9 +166,14 @@ function backToMainView(): void {
 
 /// Show add tracking number dialog
 // TODO: add optional add carrier drop down window, use the csv file from 17track docs
+let showing_add_tracking_dialog = false;
 function showAddTrackingDialog(): void {
-    // Telegram's showPopup only accepts strings for message,
-    // so we'll use showAlert with a custom HTML popup instead
+    if (showing_add_tracking_dialog) {
+        showing_add_tracking_dialog = false;
+        return;
+    }
+    showing_add_tracking_dialog = true;
+    
     const popupContainer = document.createElement('div');
     popupContainer.style.padding = '16px';
     popupContainer.style.display = 'flex';
