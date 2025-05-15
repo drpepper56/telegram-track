@@ -152,6 +152,14 @@ async function create_user_request(headers: any, prime_path: string, prime_json_
     }
 }
 
+/// Back to main view
+function backToMainView(): void {
+    currentView = 'main';
+    mainView.style.display = 'block';
+    detailsView.style.display = 'none';
+    currentTrackingNumber = null;
+}
+
 /*
     POP-UP FUNCTIONS
 */
@@ -482,7 +490,7 @@ garbage end
 // Back button handling
 tg.BackButton.onClick(backToMainView);
 
+initApp();
+notification_handler();
 tg.ready();
 // TODO: if all data gets called is up to notification handler and the init function to figure out later
-notification_handler();
-initApp();
