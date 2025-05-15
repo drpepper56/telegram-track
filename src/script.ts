@@ -24,7 +24,7 @@
 */
 
 const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
-const server_api_key = process.env.SERVER_API_KEY;
+const server_api_key = '__SERVER_API_KEY__';
 console.log(server_api_key);
 // const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
 // const BACKEND_LINK = 'http://127.0.0.1:8080';

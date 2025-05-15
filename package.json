@@ -5,7 +5,8 @@
   "main": "dist/src/script.js",
   "type": "module",
   "scripts": {
-    "build": "npx tsc",
+    "build": "replace-env && npx tsc",
+    "replace-env": "replace-in-file --configFile=config/replace-env.config.js",
     "dev:build": "npx tsc -w",
     "dev:run": "nodemon dist/index.js",
     "lint": "npx eslint . --ext .ts",
