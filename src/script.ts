@@ -167,8 +167,10 @@ function backToMainView(): void {
 /// Show add tracking number dialog
 // TODO: add optional add carrier drop down window, use the csv file from 17track docs
 let showing_add_tracking_dialog = false;
+const modal = document.createElement('div');
 function showAddTrackingDialog(): void {
     if (showing_add_tracking_dialog) {
+        document.body.removeChild(modal);
         showing_add_tracking_dialog = false;
         return;
     }
@@ -229,7 +231,6 @@ function showAddTrackingDialog(): void {
     popupContainer.appendChild(buttonContainer);
     
     // Create modal container
-    const modal = document.createElement('div');
     modal.style.position = 'fixed';
     modal.style.top = '0';
     modal.style.left = '0';
