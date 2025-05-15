@@ -28,6 +28,14 @@ const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
 // const BACKEND_LINK = 'http://127.0.0.1:8080';
 
 /*
+    STATE HANDLING IS SOMETHING WE DO NOW
+*/
+
+let currentView: 'main' | 'details' = 'main';
+let currentTrackingNumber: string | null = null;
+let trackedPackages: { trackingNumber: string; status: string; lastUpdate: string }[] = [];
+
+/*
     Init TWA
 */
 
@@ -35,6 +43,16 @@ let tg = window.Telegram.WebApp;
 Telegram.WebApp.ready();
 Telegram.WebApp.expand();
 notification_handler();
+
+// Initialize the app
+async function initApp() {
+    tg.MainButton.setText('ADD TRACKING NUMBER');
+    tg.MainButton.onClick(showAddTrackingDialog);
+    tg.MainButton.show();
+    
+    await loadTrackedPackages();
+    renderTrackingList();
+}
 
 /*
     NOTIFICATION HANDLERS
@@ -105,7 +123,6 @@ async function create_user_request(headers: any, prime_path: string, prime_json_
         const user_details = await get_user_details();
         
         // send request to create the user                                                             
-        // TODO: do some encryption in the whole thing later                                                /* it only gets easier form here they said */
         const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
             method: 'post',
             mode: 'cors',
@@ -135,6 +152,115 @@ async function create_user_request(headers: any, prime_path: string, prime_json_
         console.error('Failed to parse 520 response:', parseError);
         throw parseError
     }
+}
+
+/*
+    POP-UP FUNCTIONS
+*/
+
+/// Show add tracking number dialog
+// TODO: add optional add carrier drop down window, use the csv file from 17track docs
+function showAddTrackingDialog(): void {
+    // Telegram's showPopup only accepts strings for message,
+    // so we'll use showAlert with a custom HTML popup instead
+    const popupContainer = document.createElement('div');
+    popupContainer.style.padding = '16px';
+    popupContainer.style.display = 'flex';
+    popupContainer.style.flexDirection = 'column';
+    popupContainer.style.gap = '12px';
+    popupContainer.style.width = '100%';
+    
+    // Create title
+    const title = document.createElement('div');
+    title.textContent = 'Add Tracking Number';
+    title.style.fontWeight = 'bold';
+    title.style.fontSize = '16px';
+    
+    // Create input field
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Enter tracking number';
+    input.style.padding = '10px';
+    input.style.borderRadius = '8px';
+    input.style.border = '1px solid var(--tg-theme-hint-color, #707579)';
+    input.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
+    input.style.color = 'var(--tg-theme-text-color, #000000)';
+    
+    // Create button container
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'flex-end';
+    buttonContainer.style.gap = '8px';
+    
+    // Create cancel button
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Cancel';
+    cancelButton.style.padding = '8px 12px';
+    cancelButton.style.borderRadius = '8px';
+    cancelButton.style.border = 'none';
+    cancelButton.style.background = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
+    cancelButton.style.color = 'var(--tg-theme-text-color, #000000)';
+    
+    // Create add button
+    const addButton = document.createElement('button');
+    addButton.textContent = 'Add';
+    addButton.style.padding = '8px 12px';
+    addButton.style.borderRadius = '8px';
+    addButton.style.border = 'none';
+    addButton.style.background = 'var(--tg-theme-button-color, #2481cc)';
+    addButton.style.color = 'var(--tg-theme-button-text-color, #ffffff)';
+    
+    // Add elements to container
+    buttonContainer.appendChild(cancelButton);
+    buttonContainer.appendChild(addButton);
+    popupContainer.appendChild(title);
+    popupContainer.appendChild(input);
+    popupContainer.appendChild(buttonContainer);
+    
+    // Create modal container
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.right = '0';
+    modal.style.bottom = '0';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '1000';
+    modal.appendChild(popupContainer);
+    
+    // Add to document
+    document.body.appendChild(modal);
+    
+    // Handle cancel
+    cancelButton.addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    // Handle add
+    addButton.addEventListener('click', () => {
+        const trackingNumber = input.value.trim();
+        
+        if (!trackingNumber) {
+            tg.showAlert('Please enter a tracking number');
+            return;
+        }
+        
+        document.body.removeChild(modal);
+        addTrackingNumber(trackingNumber);
+    });
+    
+    // Focus input when modal appears
+    setTimeout(() => input.focus(), 100);
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
 }
 
 
@@ -405,4 +531,8 @@ garbage end
 
 */
 
+// Back button handling
+tg.BackButton.onClick(backToMainView);
 
+tg.ready();
+initApp();
