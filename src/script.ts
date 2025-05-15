@@ -164,10 +164,79 @@ function backToMainView(): void {
     POP-UP FUNCTIONS
 */
 
+// init variable to toggle
+let showing_add_tracking_dialog = false;
+// init the elements before to be able to toggle them
+const popupContainer = document.createElement('div');
+popupContainer.style.padding = '16px';
+popupContainer.style.display = 'flex';
+popupContainer.style.flexDirection = 'column';
+popupContainer.style.gap = '12px';
+popupContainer.style.width = '100%';
+
+// Create title
+const title = document.createElement('div');
+title.textContent = 'Add Tracking Number';
+title.style.fontWeight = 'bold';
+title.style.fontSize = '16px';
+
+// Create input field
+const input = document.createElement('input');
+input.type = 'text';
+input.placeholder = 'Enter tracking number';
+input.style.padding = '10px';
+input.style.borderRadius = '8px';
+input.style.border = '1px solid var(--tg-theme-hint-color, #707579)';
+input.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
+input.style.color = 'var(--tg-theme-text-color, #000000)';
+
+// Create button container
+const buttonContainer = document.createElement('div');
+buttonContainer.style.display = 'flex';
+buttonContainer.style.justifyContent = 'flex-end';
+buttonContainer.style.gap = '8px';
+
+// Create cancel button
+const cancelButton = document.createElement('button');
+cancelButton.textContent = 'Cancel';
+cancelButton.style.padding = '8px 12px';
+cancelButton.style.borderRadius = '8px';
+cancelButton.style.border = 'none';
+cancelButton.style.background = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
+cancelButton.style.color = 'var(--tg-theme-text-color, #000000)';
+
+// Create add button
+const addButton = document.createElement('button');
+addButton.textContent = 'Add';
+addButton.style.padding = '8px 12px';
+addButton.style.borderRadius = '8px';
+addButton.style.border = 'none';
+addButton.style.background = 'var(--tg-theme-button-color, #2481cc)';
+addButton.style.color = 'var(--tg-theme-button-text-color, #ffffff)';
+
+// Add elements to container
+buttonContainer.appendChild(cancelButton);
+buttonContainer.appendChild(addButton);
+popupContainer.appendChild(title);
+popupContainer.appendChild(input);
+popupContainer.appendChild(buttonContainer);
+
+// Create modal container
+const modal = document.createElement('div');
+modal.style.position = 'fixed';
+modal.style.top = '0';
+modal.style.left = '0';
+modal.style.right = '0';
+modal.style.bottom = '0';
+modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+modal.style.display = 'flex';
+modal.style.justifyContent = 'center';
+modal.style.alignItems = 'center';
+modal.style.zIndex = '1000';
+modal.appendChild(popupContainer);
+
 /// Show add tracking number dialog
 // TODO: add optional add carrier drop down window, use the csv file from 17track docs
-let showing_add_tracking_dialog = false;
-const modal = document.createElement('div');
 function showAddTrackingDialog(): void {
     if (showing_add_tracking_dialog) {
         document.body.removeChild(modal);
@@ -176,72 +245,7 @@ function showAddTrackingDialog(): void {
     }
     showing_add_tracking_dialog = true;
     
-    const popupContainer = document.createElement('div');
-    popupContainer.style.padding = '16px';
-    popupContainer.style.display = 'flex';
-    popupContainer.style.flexDirection = 'column';
-    popupContainer.style.gap = '12px';
-    popupContainer.style.width = '100%';
     
-    // Create title
-    const title = document.createElement('div');
-    title.textContent = 'Add Tracking Number';
-    title.style.fontWeight = 'bold';
-    title.style.fontSize = '16px';
-    
-    // Create input field
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Enter tracking number';
-    input.style.padding = '10px';
-    input.style.borderRadius = '8px';
-    input.style.border = '1px solid var(--tg-theme-hint-color, #707579)';
-    input.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
-    input.style.color = 'var(--tg-theme-text-color, #000000)';
-    
-    // Create button container
-    const buttonContainer = document.createElement('div');
-    buttonContainer.style.display = 'flex';
-    buttonContainer.style.justifyContent = 'flex-end';
-    buttonContainer.style.gap = '8px';
-    
-    // Create cancel button
-    const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
-    cancelButton.style.padding = '8px 12px';
-    cancelButton.style.borderRadius = '8px';
-    cancelButton.style.border = 'none';
-    cancelButton.style.background = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
-    cancelButton.style.color = 'var(--tg-theme-text-color, #000000)';
-    
-    // Create add button
-    const addButton = document.createElement('button');
-    addButton.textContent = 'Add';
-    addButton.style.padding = '8px 12px';
-    addButton.style.borderRadius = '8px';
-    addButton.style.border = 'none';
-    addButton.style.background = 'var(--tg-theme-button-color, #2481cc)';
-    addButton.style.color = 'var(--tg-theme-button-text-color, #ffffff)';
-    
-    // Add elements to container
-    buttonContainer.appendChild(cancelButton);
-    buttonContainer.appendChild(addButton);
-    popupContainer.appendChild(title);
-    popupContainer.appendChild(input);
-    popupContainer.appendChild(buttonContainer);
-    
-    // Create modal container
-    modal.style.position = 'fixed';
-    modal.style.top = '0';
-    modal.style.left = '0';
-    modal.style.right = '0';
-    modal.style.bottom = '0';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-    modal.style.zIndex = '1000';
-    modal.appendChild(popupContainer);
     
     // Add to document
     document.body.appendChild(modal);
