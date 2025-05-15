@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package Tracker</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="app_style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main View -->
+        <div id="main-view">
+            <div class="header">Tracked Packages</div>
+            <div id="tracking-list" class="tracking-list">
+                <!-- Tracking items will be inserted here -->
+            </div>
+            <div id="empty-state" class="empty-state" style="display: none;">
+                No packages being tracked. Add one using the button below!
+            </div>
+        </div>
+
+        <!-- Package Details View (hidden by default) -->
+        <div id="details-view" style="display: none;">
+            <div class="header" id="details-header">Package Details</div>
+            <div id="events-list" class="events-list">
+                <!-- Tracking events will be inserted here -->
+            </div>
+            <button id="remove-btn" class="remove-btn">Remove Tracking</button>
+        </div>
+    </div>
+
+    <script src="app.ts" type="module"></script>
+</body>
+</html>

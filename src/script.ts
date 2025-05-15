@@ -1,5 +1,19 @@
 /*
-    IMPORTS
+    TODO:
+
+    Save the tracking number with a tag for the package set by the user or a default in telegram storage.
+
+    In run time memory save a list of {tracking_number, package_tag, {tracking_events}}, this will be requested only when the
+    app is opened normally, not via a notification about ta tracking update.
+
+    When the app is opened with notification parameters {tracking number}, only request the events for that number
+
+    Add button to delete a tracking number, from the telegram memory list as well as from the database relation list
+
+    Put the (fries in the bag) add tracking number function in the telegram main button
+
+
+
 */
 
 
@@ -10,6 +24,8 @@
 */
 
 const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
+const server_api_key = process.env.SERVER_API_KEY;
+console.log(server_api_key);
 // const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
 // const BACKEND_LINK = 'http://127.0.0.1:8080';
 

@@ -1,0 +1,64 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--tg-theme-bg-color, #ffffff);
+    color: var(--tg-theme-text-color, #000000);
+}
+.container {
+    padding: 16px;
+}
+.header {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.tracking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.tracking-item {
+    background-color: var(--tg-theme-secondary-bg-color, #f4f4f5);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.tracking-number {
+    font-weight: bold;
+}
+.tracking-status {
+    font-size: 14px;
+    color: var(--tg-theme-hint-color, #707579);
+}
+.events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+}
+.event-item {
+    background-color: var(--tg-theme-secondary-bg-color, #f4f4f5);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+}
+.event-date {
+    color: var(--tg-theme-hint-color, #707579);
+    font-size: 12px;
+    margin-top: 4px;
+}
+.remove-btn {
+    color: var(--tg-theme-destructive-text-color, #ff3b30);
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+.empty-state {
+    text-align: center;
+    color: var(--tg-theme-hint-color, #707579);
+    margin-top: 40px;
+}
