@@ -5,8 +5,7 @@
   "main": "dist/src/script.js",
   "type": "module",
   "scripts": {
-    "build": "npm run replace-env && npx tsc",
-    "replace-env": "replace-in-file --configFile=config/replace-env.config.js",
+    "build": "npx tsc",
     "dev:build": "npx tsc -w",
     "dev:run": "nodemon dist/index.js",
     "lint": "npx eslint . --ext .ts",
@@ -30,11 +29,10 @@
     "eslint": "^8.57.0",
     "nodemon": "^3.1.0",
     "prettier": "^3.2.5",
-    "replace-in-file": "^8.3.0",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "serve": "^14.2.3"
+    "serve": "^14.2.3",
+    "express": "^4.18.2"
   }
 }
