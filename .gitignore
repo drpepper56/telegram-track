@@ -2,3 +2,6 @@ node_modules
 dist
 .env
 .DS_store
+src/app.ts
+public/app.html
+public/app_style.css
