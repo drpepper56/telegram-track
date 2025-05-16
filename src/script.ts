@@ -352,6 +352,7 @@ async function showTrackingDetails(tracking_number: string): Promise<void> {
         console.log("not found data to display")
         return
     }
+    console.log('found', found);
     // Load and display tracking events
     renderTrackingDetails(found);
 }
