@@ -271,11 +271,11 @@ async function initApp() {
     tg.MainButton.show();
 
     // TODO: if all data gets called is up to notification handler and the init function to figure out later
-    const notification_present = await notification_handler();
-    if (notification_present) {
-        // open tracking details page with notification package details
-        return;
-    }
+    // const notification_present = await notification_handler();
+    // if (notification_present) {
+    //     // open tracking details page with notification package details
+    //     return;
+    // }
     
     // Load data and pass directly to render function
     const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
