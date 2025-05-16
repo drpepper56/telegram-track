@@ -265,8 +265,9 @@ function showAddTrackingDialog(): void {
             return;
         }
         
-        document.body.removeChild(modal);
         register_one_tracking_number(trackingNumber);
+        document.body.removeChild(modal);
+        tg.MainButton.show();
     });
     
     // Focus input when modal appears
@@ -276,6 +277,7 @@ function showAddTrackingDialog(): void {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             document.body.removeChild(modal);
+            tg.MainButton.show();
         }
     });
 }
