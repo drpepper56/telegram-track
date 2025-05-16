@@ -129,6 +129,8 @@ function createPackageElement(pkg: PackageData): HTMLElement {
         container.appendChild(metrics);
     }
 
+    console.info(container);
+
     return container;
 }
 /// return a html element to display info from @event
@@ -357,14 +359,15 @@ async function showTrackingDetails(tracking_number: string): Promise<void> {
 
 /// Render tracking events for a package
 function renderTrackingDetails(tracking_details: PackageData): void {
-    eventsList.innerHTML = '';
+    detailsView.innerHTML = '';
     
     if (tracking_details.providers_data.provider_events.length === 0) {
-        eventsList.innerHTML = '<div class="empty-state">No tracking events found</div>';
+        detailsView.innerHTML = '<div class="empty-state">No tracking events found</div>';
         return;
     }
     
-    eventsList.appendChild(createPackageElement(tracking_details));
+    const trackingDetailsElement = createPackageElement(tracking_details)
+    detailsView.appendChild(trackingDetailsElement);
 }
 
 
