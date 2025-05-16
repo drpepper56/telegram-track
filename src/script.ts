@@ -16,8 +16,6 @@
 
 */
 
-import { assert } from "console";
-
 
 /* 
     TYPE "SAFETY"
@@ -394,8 +392,8 @@ async function notification_handler(): Promise<boolean> {
         let response_json = await get_tracking_data(decodedData.package_update).then((data) => data!).catch((err) => console.log(err));
 
         // ts
-        // NOTIFICATION_DATA = response_json! as unknown as PackageData;
-        // renderTrackingDetails(NOTIFICATION_DATA);
+        NOTIFICATION_DATA = response_json! as unknown as PackageData;
+        renderTrackingDetails(NOTIFICATION_DATA);
         // temp function
         // notify(response_json!);
         return true;
