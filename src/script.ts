@@ -254,6 +254,7 @@ function showAddTrackingDialog(): void {
     // Handle cancel
     cancelButton.addEventListener('click', () => {
         document.body.removeChild(modal);
+        tg.MainButton.show();
     });
     
     // Handle add
