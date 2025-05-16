@@ -16,6 +16,8 @@
 
 */
 
+import { assert } from "console";
+
 
 /* 
     TYPE "SAFETY"
@@ -249,9 +251,10 @@ const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
 
 let currentView: 'main' | 'details' | 'notification_details' = 'main';
 let currentTrackingNumber: string | null = null;
-let USER_PACKAGES_DATA: PackageData[] = [];
 // set telegram window object
 const tg = window.Telegram.WebApp;
+let USER_PACKAGES_DATA: PackageData[] = [];
+let NOTIFICATION_DATA: PackageData | undefined;
 
 
 /*
@@ -261,13 +264,18 @@ const tg = window.Telegram.WebApp;
 
 // Initialize the app
 async function initApp() {
-    // TODO: if all data gets called is up to notification handler and the init function to figure out later
-    notification_handler();
 
     // show main button and assign the add tracking function to it
     tg.MainButton.setText('ADD TRACKING NUMBER');
     tg.MainButton.onClick(showAddTrackingDialog);
     tg.MainButton.show();
+
+    // TODO: if all data gets called is up to notification handler and the init function to figure out later
+    const notification_present = await notification_handler();
+    if (notification_present) {
+        // open tracking details page with notification package details
+        return;
+    }
     
     // Load data and pass directly to render function
     const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
@@ -367,10 +375,11 @@ function renderTrackingDetails(tracking_details: PackageData): void {
     NOTIFICATION HANDLERS
 */
 
-function notification_handler() {
+async function notification_handler(): Promise<boolean> {
     // get the deep link url value and cheat this stupid environment, 64 characters
     let startParam = window.location.search;
     console.log('startParam', startParam)
+    // try to get param
     try {
         // json -> base64 -> json decoding pogchamp
         const urlParams = new URLSearchParams(startParam);
@@ -382,11 +391,18 @@ function notification_handler() {
         console.log(decodedData.package_update);
 
         // request the tracking data
-        get_tracking_data(decodedData.package_update);
+        let response_json = await get_tracking_data(decodedData.package_update).then((data) => data!).catch((err) => console.log(err));
+
+        // ts
+        NOTIFICATION_DATA = response_json! as unknown as PackageData;
+        renderTrackingDetails(NOTIFICATION_DATA);
+        // temp function
+        // notify(response_json!);
+        return true;
 
         // notify(decodedData.package_update);
     } catch (e) {
-        console.error("Error parsing start param:", e);
+        return false;
     }
 }
 
@@ -632,7 +648,7 @@ async function create_user_request_no_body(headers: any, prime_path: string): Pr
 
 /// Function for sending a request for tracking data of a number, assume it's already registered
 /// and the user has permissions to it, call after a notification or when accessing the tracking page
-async function get_tracking_data(tracking_number: string) {
+async function get_tracking_data(tracking_number: string): Promise<JSON | undefined> {
     // create the json to send as payload
     const prime_json_data = {
         "number": tracking_number
@@ -640,14 +656,12 @@ async function get_tracking_data(tracking_number: string) {
     const user_id_hash = await get_user_id_hash();
 
     try {
-
         // headers
         const headers = {
             'Content-Type': 'application/json',
             'Origin': window.location.origin,
             'X-User-ID-Hash': user_id_hash
         }
-
 
         const path = '/get_tracking_data'
         const success_mes = 'tracking data retrieved successfully'
@@ -667,29 +681,20 @@ async function get_tracking_data(tracking_number: string) {
             // user doesn't exist yet, call to create user, then retry the original call
             console.log("USER DOESN'T EXIST YET");
             const second_prime_response = create_user_request(headers,path,prime_json_data);
-            // user created, second response successful
-            const response_json = await second_prime_response.then((res) => res!.json()).catch((err) => console.log(err));
-            notify(response_json);
-                    
+            return await second_prime_response.then((res) => res!.json()).catch((err) => console.log(err))
         } else if (prime_response.ok) {
-            // write successful
             console.log(success_mes)
-            let response = await prime_response.json();
-            console.log(response);
-            notify(response);
-            console.log(response.status, " ", response.text());
+            return await prime_response.json();
         } else if (!prime_response.ok) {
-            console.log('Response status error', prime_response.status, prime_response.text());  
-            document.getElementById('error_panel')!.textContent = 'error';
+            console.log('Response status error', prime_response.status, prime_response.text());
+            return;
         } else {
             /* the more errors you get the smarter you are */
             throw new Error('unknown error');
-        }
-          
-    
-        } catch (error) {
-            /* the more errors you get the smarter you are */   
-            console.log('some other error:', error);
+        }          
+    } catch (error) {
+        /* the more errors you get the smarter you are */   
+        throw error;
     }; 
 
 }
