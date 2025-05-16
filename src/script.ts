@@ -17,7 +17,223 @@
 */
 
 
-// adssaf
+/* 
+    TYPE "SAFETY"
+
+    tracking data json form on the server
+*/
+
+interface PackageData {
+    tracking_number: string;
+    tag?: string;
+    latest_event?: event;
+    providers_data: tracking_provider_provided_events;
+    time_metrics?: time_metrics;
+}
+interface tracking_provider_provided_events {
+     provider_name?: string;
+     provider_key?: number;
+     provider_events: event[];
+}
+interface event {
+     description?: string;
+     location?: string;
+     stage?: string;
+     sub_status?: string;
+     address?: address;
+     time?: time_raw;
+}
+interface address {
+    country?: string;
+    state?: string;
+    city?: string;
+    street?: string;
+    postal_code?: string;
+    coordinates?: coordinates,
+}
+interface coordinates {
+    longitude?: number;
+    latitude?: number;
+}
+interface time_raw {
+    date?: string;
+    time?: string;
+    timezone?: string;
+}
+interface time_metrics {
+    days_after_order?: number;
+    days_of_transit?: number;
+    days_of_transit_done?: number;
+    days_after_last_update?: number;
+    estimated_delivery_date?: delivery_estimate;
+}
+interface delivery_estimate {
+    source?: string;
+    from?: string;
+    to?: string;
+}
+
+/*
+    DISPLAY FUNCTION FOR THE STRUCTURE
+*/
+
+/// return a html element to display info from the @PackageData structure
+function createPackageElement(pkg: PackageData): HTMLElement {
+    const container = document.createElement('div');
+    container.className = 'package-container';
+
+    // Header with tracking number and tag
+    const header = document.createElement('div');
+    header.className = 'package-header';
+    
+    const trackingNumber = document.createElement('h2');
+    trackingNumber.textContent = `#${pkg.tracking_number}`;
+    
+    if (pkg.tag) {
+        const tag = document.createElement('span');
+        tag.className = 'package-tag';
+        tag.textContent = pkg.tag;
+        header.appendChild(tag);
+    }
+    header.appendChild(trackingNumber);
+    container.appendChild(header);
+
+    // Latest event section
+    if (pkg.latest_event) {
+        const latestEvent = createEventElement(pkg.latest_event, 'Latest Update');
+        container.appendChild(latestEvent);
+    }
+
+    // Provider information
+    const provider = document.createElement('div');
+    provider.className = 'provider-info';
+    
+    const providerTitle = document.createElement('h3');
+    providerTitle.textContent = pkg.providers_data.provider_name || 'Shipping Provider';
+    provider.appendChild(providerTitle);
+    
+    if (pkg.providers_data.provider_events.length > 0) {
+        const eventsList = document.createElement('div');
+        eventsList.className = 'events-list';
+        
+        pkg.providers_data.provider_events.forEach(event => {
+            eventsList.appendChild(createEventElement(event));
+        });
+        provider.appendChild(eventsList);
+    }
+    container.appendChild(provider);
+
+    // Time metrics
+    if (pkg.time_metrics) {
+        const metrics = createTimeMetricsElement(pkg.time_metrics);
+        container.appendChild(metrics);
+    }
+
+    return container;
+}
+/// return a html element to display info from @event
+function createEventElement(event: event, title?: string): HTMLElement {
+    const element = document.createElement('div');
+    element.className = 'event';
+    
+    if (title) {
+        const titleElement = document.createElement('h4');
+        titleElement.textContent = title;
+        element.appendChild(titleElement);
+    }
+    
+    if (event.description) {
+        const desc = document.createElement('p');
+        desc.className = 'event-description';
+        desc.textContent = event.description;
+        element.appendChild(desc);
+    }
+    
+    if (event.stage) {
+        const stage = document.createElement('p');
+        stage.className = 'event-stage';
+        stage.textContent = `Status: ${event.stage}`;
+        element.appendChild(stage);
+    }
+    
+    if (event.location || event.address) {
+        const location = document.createElement('div');
+        location.className = 'event-location';
+        
+        if (event.location) {
+            location.textContent = `📍 ${event.location}`;
+        } else if (event.address) {
+            const addr = event.address;
+            location.textContent = [
+                addr.street,
+                addr.city,
+                addr.state,
+                addr.country,
+                addr.postal_code
+            ].filter(Boolean).join(', ');
+        }
+        element.appendChild(location);
+    }
+    
+    if (event.time) {
+        const time = document.createElement('p');
+        time.className = 'event-time';
+        time.textContent = formatEventTime(event.time);
+        element.appendChild(time);
+    }
+    
+    return element;
+}
+/// return a html element to display info from @time_metrics
+function createTimeMetricsElement(metrics: time_metrics): HTMLElement {
+    const element = document.createElement('div');
+    element.className = 'time-metrics';
+    
+    const title = document.createElement('h3');
+    title.textContent = 'Delivery Timeline';
+    element.appendChild(title);
+    
+    const list = document.createElement('ul');
+    
+    if (metrics.days_after_order !== undefined) {
+        const item = document.createElement('li');
+        item.textContent = `Order placed ${metrics.days_after_order} days ago`;
+        list.appendChild(item);
+    }
+    
+    if (metrics.days_of_transit !== undefined) {
+        const item = document.createElement('li');
+        const done = metrics.days_of_transit_done || 0;
+        item.textContent = `In transit: ${done}/${metrics.days_of_transit} days`;
+        list.appendChild(item);
+    }
+    
+    if (metrics.days_after_last_update !== undefined) {
+        const item = document.createElement('li');
+        item.textContent = `Last update: ${metrics.days_after_last_update} days ago`;
+        list.appendChild(item);
+    }
+    
+    if (metrics.estimated_delivery_date) {
+        const est = metrics.estimated_delivery_date;
+        const item = document.createElement('li');
+        item.textContent = `Estimated delivery: ${est.from}${est.to ? ` to ${est.to}` : ''}`;
+        if (est.source) {
+            item.textContent += ` (source: ${est.source})`;
+        }
+        list.appendChild(item);
+    }
+    
+    element.appendChild(list);
+    return element;
+}
+/// return a html element to display info from @time_raw
+function formatEventTime(time: time_raw): string {
+    if (time.date && time.time) {
+        return `${time.date} at ${time.time}${time.timezone ? ` (${time.timezone})` : ''}`;
+    }
+    return time.date || time.time || '';
+}
 
 /*
     CONSTANTS
@@ -31,26 +247,121 @@ const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
     STATE HANDLING IS SOMETHING WE DO NOW
 */
 
-let currentView: 'main' | 'details' = 'main';
+let currentView: 'main' | 'details' | 'notification_details' = 'main';
 let currentTrackingNumber: string | null = null;
-let trackedPackages: { trackingNumber: string; status: string; lastUpdate: string }[] = [];
+let USER_PACKAGES_DATA: PackageData[] = [];
+// set telegram window object
+const tg = window.Telegram.WebApp;
+
 
 /*
     Init TWA
 */
 
-const tg = window.Telegram.WebApp;
 
 // Initialize the app
 async function initApp() {
+    // TODO: if all data gets called is up to notification handler and the init function to figure out later
+    notification_handler();
+
     // show main button and assign the add tracking function to it
     tg.MainButton.setText('ADD TRACKING NUMBER');
     tg.MainButton.onClick(showAddTrackingDialog);
     tg.MainButton.show();
     
-    // await loadTrackedPackages();
-    // renderTrackingList();
+    // Load data and pass directly to render function
+    const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+    USER_PACKAGES_DATA = trackingData; // Update global state
+    renderTrackingList(); // Pass data directly
 }
+
+/*
+    INIT ELEMENTS
+*/
+
+// DOM Elements
+const mainView = document.getElementById('main-view') as HTMLElement;
+const detailsView = document.getElementById('details-view') as HTMLElement;
+const trackingList = document.getElementById('tracking-list') as HTMLElement;
+const eventsList = document.getElementById('events-list') as HTMLElement;
+const emptyState = document.getElementById('empty-state') as HTMLElement;
+const removeBtn = document.getElementById('remove-btn') as HTMLButtonElement;
+
+/* 
+    ELEMENTS FUNCTIONS
+*/
+
+/// Update empty state visibility
+function updateEmptyState(): void {
+    emptyState.style.display = USER_PACKAGES_DATA.length === 0 ? 'block' : 'none';
+}
+
+// Render the list of tracked packages
+function renderTrackingList(): void {
+    trackingList.innerHTML = '';
+
+    // exit early if empty or undefined
+    if (!USER_PACKAGES_DATA || USER_PACKAGES_DATA.length === 0) {
+        console.log("empty or undefined")
+        updateEmptyState();
+        return;
+    }
+    
+    USER_PACKAGES_DATA.forEach(pkg => {
+        const item = document.createElement('div');
+        item.className = 'tracking-item';
+        item.innerHTML = `
+            <div>
+                <div class="tracking-number">${pkg.tracking_number} • ${"user name tag will go here"} </div>
+                <div class="tracking-status">${pkg.latest_event?.description} • ${pkg.latest_event?.time?.date} • ${pkg.latest_event?.time?.time}</div>
+            </div>
+            <div>></div>
+        `;
+        
+        item.addEventListener('click', () => showTrackingDetails(pkg.tracking_number));
+        trackingList.appendChild(item);
+    });
+    
+    // updates the styling options of emptyState
+    updateEmptyState();
+}
+
+// Show details for a tracking number
+async function showTrackingDetails(tracking_number: string): Promise<void> {
+    currentTrackingNumber = tracking_number;
+
+    // state change
+    currentView = 'details';
+    mainView.style.display = 'none';
+    detailsView.style.display = 'block';
+    
+    // Update header with tracking number
+    const detailsHeader = document.getElementById('details-header') as HTMLElement;
+    detailsHeader.textContent = `Tracking #${tracking_number}`;
+
+    const found = USER_PACKAGES_DATA.find(pkg => pkg.tracking_number === tracking_number);
+    if (!found) {
+        console.log("not found data to display")
+        return
+    }
+    // Load and display tracking events
+    
+    
+}
+
+/// Render tracking events for a package
+function renderTrackingDetails(tracking_details: PackageData): void {
+    eventsList.innerHTML = '';
+    
+    if (tracking_details.providers_data.provider_events.length === 0) {
+        eventsList.innerHTML = '<div class="empty-state">No tracking events found</div>';
+        return;
+    }
+    
+    eventsList.appendChild(createPackageElement(tracking_details));
+}
+
+
 
 /*
     NOTIFICATION HANDLERS
@@ -113,44 +424,8 @@ async function get_user_details() {
     return user_details;
 }
 
-/// Function for creating a user and resending a request if the user has been created
-async function create_user_request(headers: any, prime_path: string, prime_json_data: any) {
-    console.log("USER DOESN'T EXIST YET");
-    try {
-        // create the json for user details
-        const user_details = await get_user_details();
-        
-        // send request to create the user                                                             
-        const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
-            method: 'post',
-            mode: 'cors',
-            headers,
-            body: JSON.stringify(user_details)
-        });
 
-        if(create_user_response.ok) {
-            // resend primary message
-            const second_prime_response = await fetch(BACKEND_LINK + prime_path, {
-                method: 'post',
-                mode: 'cors',
-                headers,
-                body: JSON.stringify(prime_json_data)
-            });
 
-            if(second_prime_response.ok) {
-                return second_prime_response;
-            } else {
-                throw new Error("second prime response failed when after creating the user" + 
-                    second_prime_response.status + " " + second_prime_response.text())
-            }
-        }
-                                                                                        
-    } catch (parseError) {
-        /* the more errors you get the smarter you are */
-        console.error('Failed to parse 520 response:', parseError);
-        throw parseError
-    }
-}
 
 /// Back to main view
 function backToMainView(): void {
@@ -164,22 +439,14 @@ function backToMainView(): void {
     POP-UP FUNCTIONS
 */
 
-// init variable to toggle
-// let showing_add_tracking_dialog = false;
-
 
 /// Show add tracking number dialog
 // TODO: add optional add carrier drop down window, use the csv file from 17track docs
+// TODO: user should add a name tag to the package that will be saved in the telegram env memory
 function showAddTrackingDialog(): void {
+    // disable the button, make enabled after removing the elements added in this function
     tg.MainButton.hide()
-    // if (showing_add_tracking_dialog) {
-    //     document.body.removeChild(modal);
-    //     showing_add_tracking_dialog = false;
-    //     return;
-    // }
-    // showing_add_tracking_dialog = true;
 
-    // init the elements before to be able to toggle them, works
     const popupContainer = document.createElement('div');
     popupContainer.style.padding = '16px';
     popupContainer.style.display = 'flex';
@@ -284,10 +551,84 @@ function showAddTrackingDialog(): void {
 }
 
 
-
 /*
-    API RELATED FUNCTIONS
+    API RELATED FUNCTIONS, HTTP REQUESTS
 */
+
+/// Function for creating a user and resending a request if the user has been created
+async function create_user_request(headers: any, prime_path: string, prime_json_data: any): Promise<Response | undefined> {
+    console.log("USER DOESN'T EXIST YET");
+    try {
+        // create the json for user details
+        const user_details = await get_user_details();
+        
+        // send request to create the user                                                             
+        const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
+            method: 'post',
+            mode: 'cors',
+            headers,
+            body: JSON.stringify(user_details)
+        });
+
+        if(create_user_response.ok) {
+            // resend primary message
+            const second_prime_response = await fetch(BACKEND_LINK + prime_path, {
+                method: 'post',
+                mode: 'cors',
+                headers,
+                body: JSON.stringify(prime_json_data)
+            });
+
+            if(second_prime_response.ok) {
+                return second_prime_response;
+            }
+            throw new Error("second prime response failed when after creating the user" + 
+                second_prime_response.status + " " + second_prime_response.text())
+        }
+                                                                                        
+    } catch (parseError) {
+        /* the more errors you get the smarter you are */
+        console.error('Failed to parse 520 response:', parseError);
+        throw parseError
+    }
+}
+
+/// Function for creating a user and resending a request without body if the user has been created
+async function create_user_request_no_body(headers: any, prime_path: string): Promise<Response | undefined> {
+    console.log("USER DOESN'T EXIST YET");
+    try {
+        // create the json for user details
+        const user_details = await get_user_details();
+
+        // send request to create the user                                                             
+        const create_user_response = await fetch(BACKEND_LINK + '/create_user', {
+            method: 'post',
+            mode: 'cors',
+            headers,
+            body: JSON.stringify(user_details)
+        });
+
+        if(create_user_response.ok) {
+            // resend primary message
+            const second_prime_response = await fetch(BACKEND_LINK + prime_path, {
+                method: 'post',
+                mode: 'cors',
+                headers
+            });
+
+            if(second_prime_response.ok) {
+                return second_prime_response;
+            } 
+            throw new Error("second prime response failed when after creating the user" + 
+                second_prime_response.status + " " + second_prime_response.text())
+        }
+                                                                                        
+    } catch (parseError) {
+        /* the more errors you get the smarter you are */
+        console.error('Failed to parse 520 response:', parseError);
+        throw parseError
+    }
+}
 
 /// Function for sending a request for tracking data of a number, assume it's already registered
 /// and the user has permissions to it, call after a notification or when accessing the tracking page
@@ -354,16 +695,63 @@ async function get_tracking_data(tracking_number: string) {
 }
 
 // TODO: test this later iykyk
+/// Function to register a single tracking number, called from the popup element that opens on the main button
 async function register_one_tracking_number(tracking_number: string) {
     // create the json to send as payload
     const prime_json_data = {
         "number": tracking_number,
         "carrier": Number(null)
     };
-    console.log(prime_json_data);
+    // console.log(prime_json_data);
     const path = '/register_tracking_number';
     const user_id_hash = await get_user_id_hash();
-    console.log(prime_json_data);
+    // console.log(prime_json_data);
+
+    try {
+        // headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin,
+            'X-User-ID-Hash': user_id_hash
+        }
+        // send the primary message
+        const prime_response = await fetch(BACKEND_LINK + path, {
+            method: 'post',
+            mode: 'cors',
+            headers,
+            body: JSON.stringify(prime_json_data)
+        });
+        // /* the more errors you get the smarter you are */
+        // const responseClone = response.clone();
+        if (prime_response.status == 520) {
+            // user doesn't exist yet, call to create user, then retry the original call
+            const second_prime_response = create_user_request(headers,path,prime_json_data);
+            // user created, second response successful
+            const response_json = await second_prime_response.then((json) => json).catch((err) => console.log(err));
+            console.log(response_json)
+            console.log("registered the number successfully")
+        } else if (prime_response.ok) {
+            console.log("registered the number successfully");
+        } else if (!prime_response.ok) {
+            console.log('Response status error', prime_response.status, prime_response.json());  
+        } else {
+            /* the more errors you get the smarter you are */
+            throw new Error('unknown error');
+        }
+    } catch (error) {
+        /* the more errors you get the smarter you are */   
+        console.log('some other error:', error);
+    }; 
+}
+
+// Function to load all the user's tracked packages info, called when app is started 
+// or when user exists the notification screen
+async function loadTrackedPackages(): Promise<PackageData[] | undefined> {
+
+    // no json to send as payload, user is in the header 
+
+    const path = '/get_user_tracked_numbers_details';
+    const user_id_hash = await get_user_id_hash();
 
     try {
 
@@ -378,8 +766,7 @@ async function register_one_tracking_number(tracking_number: string) {
         const prime_response = await fetch(BACKEND_LINK + path, {
             method: 'post',
             mode: 'cors',
-            headers,
-            body: JSON.stringify(prime_json_data)
+            headers
         });
 
         // /* the more errors you get the smarter you are */
@@ -387,49 +774,28 @@ async function register_one_tracking_number(tracking_number: string) {
 
         if (prime_response.status == 520) {
             // user doesn't exist yet, call to create user, then retry the original call
-            const second_prime_response = create_user_request(headers,path,prime_json_data);
+            const second_prime_response = create_user_request_no_body(headers,path);
             // user created, second response successful
-            const response_json = await second_prime_response.then((json) => json).catch((err) => console.log(err));
+            const response_json = await second_prime_response.then((r) => r?.json()).catch((err) => console.log(err));
+            console.log("user data retrieved successfully")
             console.log(response_json)
-            console.log("registered the number successfully")
+            return response_json as PackageData[];
         } else if (prime_response.ok) {
-            console.log('write successful')
-            document.getElementById('error_panel')!.textContent = 'success';
+            const response_json = await prime_response.json();
+            console.log("user data retrieved successfully")
+            console.log(response_json);
+            return response_json as PackageData[];
         } else if (!prime_response.ok) {
-            console.log('Response status error', prime_response.status, prime_response.json());  
-            document.getElementById('error_panel')!.textContent = 'error';
+            throw new Error('bad response error');
         } else {
             /* the more errors you get the smarter you are */
             throw new Error('unknown error');
         }
-        
-
-        } catch (error) {
-            /* the more errors you get the smarter you are */   
-            console.log('some other error:', error);
+    } catch (error) {
+        /* the more errors you get the smarter you are */   
+        throw new Error('unknown error');
     }; 
 }
-
-
-/*
-
-
-
-
-
-
-
-
-
-clean everything down there too much testing going on
-
-
-
-
-
-
-
-*/
 
 // show the stuff from the notification in the dom
 function notify(payload: JSON) {  
@@ -444,7 +810,6 @@ function notify(payload: JSON) {
     console.log(JSON.stringify(payload, null, 2));
     document.getElementById("update-box")!.innerText = JSON.stringify(payload, null, 2);
 }
-
 
 /*
     ONLY KNOWN WAY TO UPDATE THE DOM WITH VALUES DYNAMICALLY
@@ -480,31 +845,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 })
 
-
-/*
-
-
-
-
-
-
-
-
-
-garbage end
-
-
-
-
-
-
-
-*/
-
 // Back button handling
 tg.BackButton.onClick(backToMainView);
 
 initApp();
-notification_handler();
 tg.ready();
-// TODO: if all data gets called is up to notification handler and the init function to figure out later

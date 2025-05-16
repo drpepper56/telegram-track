@@ -13,38 +13,34 @@
 
 <body>
     <main>
-        <!-- test register tracking number with user auth -->
-        <div>
-            <input type="text" value="87VY18633903A081" id="tracking_number">
-                tracking
-            </input>
-            <input type="text" value="" id="carrier_text">
-                carrier
-            </input>
-            <button id="register_number_button" onclick="register_one_tracking_number();">
-                register tracking number for notification updates
-            </button>
+        <!-- app area -->
+        <div class="container">
+            <!-- Main View -->
+            <div id="main-view">
+                <div class="header">Tracked Packages</div>
+                <div id="tracking-list" class="tracking-list">
+                    <!-- Tracking items will be inserted here -->
+                </div>
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    Add a package to track using the button below.
+                </div>
+            </div>
+    
+            <!-- Package Details View (hidden by default) -->
+            <div id="details-view" style="display: none;">
+                <div class="header" id="details-header">Package Details</div>
+                <div id="events-list" class="events-list">
+                    <!-- Tracking events will be inserted here -->
+                </div>
+                <button id="remove-btn" class="remove-btn">Remove Tracking</button>
+            </div>
         </div>
-
-        <label id="error_panel"></label>
-
-        <div>
-            <label id="statusLabel">Initial Status: Not loaded</label>
-            <button id="refreshBtn">Refresh Status</button>
-        </div>
-
-        <h1>Buttons</h1>
-        <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
-        <button onclick="toggleMainButton();">Toggle Main Button</button>
-
+        <!-- notification area  -->
         <div id="notification-banner">
             <h3>here are your notification parameters</h3>
             <div id="update-box"></div>
         </div>
     </main>
-    <div id="viewport"></div>
-    <div id="viewport-params-size"></div>
-    <div id="viewport-params-expand"></div>
     <script src="../dist/src/script.js"></script>
 </body>
 </html>
