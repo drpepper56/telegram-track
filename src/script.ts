@@ -353,8 +353,7 @@ async function showTrackingDetails(tracking_number: string): Promise<void> {
         return
     }
     // Load and display tracking events
-    
-    
+    renderTrackingDetails(found);
 }
 
 /// Render tracking events for a package
