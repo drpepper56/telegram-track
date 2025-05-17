@@ -360,6 +360,7 @@ async function showTrackingDetails(tracking_number: string): Promise<void> {
 /// Render tracking events for a package
 function renderTrackingDetails(tracking_details: PackageData): void {
     detailsView.innerHTML = '';
+    console.log('tracking_details', tracking_details);
     const trackingDetailsElement = createPackageElement(tracking_details)
     detailsView.appendChild(trackingDetailsElement);
 }
