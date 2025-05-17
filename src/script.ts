@@ -27,7 +27,7 @@ interface PackageData {
     tracking_number: string;
     tag?: string;
     latest_event?: event;
-    providers_data: tracking_provider_provided_events;
+    providers_data: tracking_provider_provided_events[];
     time_metrics?: time_metrics;
 }
 interface tracking_provider_provided_events {
@@ -105,23 +105,25 @@ function createPackageElement(pkg: PackageData): HTMLElement {
     }
 
     // Provider information
-    const provider = document.createElement('div');
-    provider.className = 'provider-info';
-    
-    const providerTitle = document.createElement('h3');
-    providerTitle.textContent = pkg.providers_data.provider_name || 'Shipping Provider';
-    provider.appendChild(providerTitle);
-    
-    if (pkg.providers_data.provider_events.length > 0) {
-        const eventsList = document.createElement('div');
-        eventsList.className = 'events-list';
+    pkg.providers_data.forEach(provider_data => {
+        const provider = document.createElement('div');
+        provider.className = 'provider-info';
         
-        pkg.providers_data.provider_events.forEach(event => {
-            eventsList.appendChild(createEventElement(event));
-        });
-        provider.appendChild(eventsList);
-    }
-    container.appendChild(provider);
+        const providerTitle = document.createElement('h3');
+        providerTitle.textContent = provider_data.provider_name || 'Shipping Provider';
+        provider.appendChild(providerTitle);
+        
+        if (provider_data.provider_events.length > 0) {
+            const eventsList = document.createElement('div');
+            eventsList.className = 'events-list';
+            
+            provider_data.provider_events.forEach(event => {
+                eventsList.appendChild(createEventElement(event));
+            });
+            provider.appendChild(eventsList);
+        }
+        container.appendChild(provider);
+    });
 
     // Time metrics
     if (pkg.time_metrics) {
