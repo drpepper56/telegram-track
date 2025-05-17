@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "npx tsc",
-    "dev:build": "npx tsc -w",
-    "dev:run": "nodemon dist/index.js",
+    "dev:run": "node server.js",
+    "dev": "npm run build && npm run dev:run",
     "lint": "npx eslint . --ext .ts",
     "format": "npx prettier --write .",
     "heroku-postbuild": "npm run build"
