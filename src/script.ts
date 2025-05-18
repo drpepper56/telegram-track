@@ -657,12 +657,15 @@ function showAddTrackingDialog(): void {
         
         // First try without carrier
         if (!carrierContainer.style.display || carrierContainer.style.display === 'none') {
+            console.log('trying with no carrier')
             const result = await register_one_tracking_number(trackingNumber);
             
             if (result === 0) {
+                console.log('found with no carrier')
                 closeModal();
                 return;
             } else if (result === 1) {
+                console.log('not found with no carrier')
                 // Show carrier selection
                 carrierContainer.style.display = 'flex';
                 input.disabled = true;
@@ -670,6 +673,7 @@ function showAddTrackingDialog(): void {
                 return;
             }
         } else {
+            console.log('trying with carrier')
             // Carrier selection is visible
             if (!selectedCarrier) {
                 tg.showAlert('Please select a carrier');
@@ -679,8 +683,10 @@ function showAddTrackingDialog(): void {
             const result = await register_one_tracking_number(trackingNumber, selectedCarrier.key);
             
             if (result === 0) {
+                console.log('found with carrier')
                 closeModal();
             } else {
+                console.log('not found with carrier')
                 tg.showAlert('Failed to add tracking number');
             }
         }
@@ -858,6 +864,9 @@ async function register_one_tracking_number(tracking_number: string, carrier?: n
             headers,
             body: JSON.stringify(prime_json_data)
         });
+
+        console.log('prime_response', prime_response);
+
         // /* the more errors you get the smarter you are */
         // const responseClone = response.clone();
         if (prime_response.status == 520) {
