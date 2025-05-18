@@ -8,7 +8,7 @@
   
       /* Modules */
       "module": "ES6",        // Output ES Modules (import/export)
-      "rootDir": "./", // Specify the root directory of input files
+      "rootDir": "./src/", // Specify the root directory of input files
       // "resolveJsonModule": true, // Enable importing .json files
   
       /* JavaScript Support */
