@@ -2612,3 +2612,5 @@ return [
     { key: 191432, name_en: "TANEX" }
 ];
 }
+
+export default getKeyNameList;

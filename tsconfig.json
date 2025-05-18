@@ -7,7 +7,7 @@
       "lib": ["DOM", "ES2020"], // Add "DOM" for browser environment, like Telegram Mini App
   
       /* Modules */
-      "module": "ESNext", // Specify module code generation (CommonJS, ESNext, etc.)
+      "module": "ES2020", // Specify module code generation (CommonJS, ESNext, etc.)
       "rootDir": "./", // Specify the root directory of input files
       "resolveJsonModule": true, // Enable importing .json files
       "moduleResolution": "node", // Specify module resolution strategy: "node" or "classic"
