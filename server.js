@@ -15,11 +15,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // serve the build js
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
 
-// idk
-// app.get('/', (req, res) => {
-//   res.sendFile(path.join(__dirname, './public', 'index.html'));
-// });
-
 // start server and bind port
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

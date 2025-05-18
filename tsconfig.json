@@ -3,12 +3,12 @@
       /* Visit https://aka.ms/tsconfig to read more about this file */
   
       /* Language and Environment */
-      "target": "ES2020", // Specify ECMAScript target version
+      "target": "ES6", // Specify ECMAScript target version
       "lib": ["DOM", "ES2020"], // Add "DOM" for browser environment, like Telegram Mini App
   
       /* Modules */
-      "module": "ES2020", // Specify module code generation (CommonJS, ESNext, etc.)
-      "rootDir": "./", // Specify the root directory of input files
+      "module": "ES6", // Specify module code generation (CommonJS, ESNext, etc.)
+      "rootDir": "./src", // Specify the root directory of input files
       "resolveJsonModule": true, // Enable importing .json files
       "moduleResolution": "node", // Specify module resolution strategy: "node" or "classic"
   
@@ -38,7 +38,7 @@
       /* Completeness */
       "skipLibCheck": true // Skip type checking of declaration files
     },
-    "include": ["src/**/*.ts"], // Specifies an array of filenames or patterns to include in the program
+    "include": ["src/**/*"], // Specifies an array of filenames or patterns to include in the program
     "exclude": ["node_modules", "dist", "**/*.spec.ts"] // Specifies an array of filenames or patterns that should be skipped when resolving include
   }
   
