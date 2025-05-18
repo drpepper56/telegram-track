@@ -479,7 +479,7 @@ function showAddTrackingDialog(): void {
         .catch(error => {
             console.error('Error loading carriers:', error);
         });
-    carriers && console.log('loaded data');
+    carriers && console.log('loaded data', carriers[0].name_en);
 
     const popupContainer = document.createElement('div');
     popupContainer.style.padding = '16px';
