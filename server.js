@@ -14,7 +14,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // serve the build js
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
-
+// serve the carrier data to the build
+app.use(express.static(path.join(__dirname, 'carriers_data')));
 // // idk
 // app.get('/', (req, res) => {
 //   res.sendFile(path.join(__dirname, './public', 'index.html'));

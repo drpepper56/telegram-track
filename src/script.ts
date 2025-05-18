@@ -479,6 +479,7 @@ function showAddTrackingDialog(): void {
         .catch(error => {
             console.error('Error loading carriers:', error);
         });
+    carriers && console.log('loaded data');
 
     const popupContainer = document.createElement('div');
     popupContainer.style.padding = '16px';
