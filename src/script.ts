@@ -23,6 +23,7 @@
     tracking data json form on the server
 */
 
+/// Structure for full package data
 interface PackageData {
     tracking_number: string;
     tag?: string;
@@ -74,7 +75,7 @@ interface delivery_estimate {
 }
 
 /*
-    DISPLAY FUNCTION FOR THE STRUCTURE
+    DISPLAY FUNCTION FOR THE @PackageData STRUCTURE
 */
 
 /// return a html element to display info from the @PackageData structure
@@ -457,9 +458,27 @@ function backToMainView(): void {
 /// Show add tracking number dialog
 // TODO: add optional add carrier drop down window, use the csv file from 17track docs
 // TODO: user should add a name tag to the package that will be saved in the telegram env memory
+// TODO: resolve 530 response, specify carrier in registering a number
 function showAddTrackingDialog(): void {
     // disable the button, make enabled after removing the elements added in this function
-    tg.MainButton.hide()
+    tg.MainButton.hide();
+
+    // Load carriers data
+    let carriers: {key: number, name_en: string}[] = [];
+    fetch('.../carrier_data/carriers.csv')
+        .then(response => response.text())
+        .then(data => {
+            const lines = data.split('\n');
+            carriers = lines.slice(1) // skip header
+                .map(line => {
+                    const [key, name_en, name_cn, name_hk, url] = line.split(',');
+                    return {key: Number(key), name_en};
+                })
+                .filter(carrier => !isNaN(carrier.key) && carrier.name_en);
+        })
+        .catch(error => {
+            console.error('Error loading carriers:', error);
+        });
 
     const popupContainer = document.createElement('div');
     popupContainer.style.padding = '16px';
@@ -467,6 +486,11 @@ function showAddTrackingDialog(): void {
     popupContainer.style.flexDirection = 'column';
     popupContainer.style.gap = '12px';
     popupContainer.style.width = '100%';
+    popupContainer.style.maxWidth = '90vw';
+    popupContainer.style.maxHeight = '90vh';
+    popupContainer.style.overflow = 'auto';
+    popupContainer.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
+    popupContainer.style.borderRadius = '12px';
 
     // Create title
     const title = document.createElement('div');
@@ -483,6 +507,37 @@ function showAddTrackingDialog(): void {
     input.style.border = '1px solid var(--tg-theme-hint-color, #707579)';
     input.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
     input.style.color = 'var(--tg-theme-text-color, #000000)';
+
+    // Carrier selection elements (initially hidden)
+    const carrierContainer = document.createElement('div');
+    carrierContainer.style.display = 'none';
+    carrierContainer.style.flexDirection = 'column';
+    carrierContainer.style.gap = '8px';
+
+    const carrierTitle = document.createElement('div');
+    carrierTitle.textContent = 'Select Carrier';
+    carrierTitle.style.fontWeight = 'bold';
+    carrierTitle.style.fontSize = '14px';
+
+    const carrierInput = document.createElement('input');
+    carrierInput.type = 'text';
+    carrierInput.placeholder = 'Search carrier...';
+    carrierInput.style.padding = '10px';
+    carrierInput.style.borderRadius = '8px';
+    carrierInput.style.border = '1px solid var(--tg-theme-hint-color, #707579)';
+    carrierInput.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
+    carrierInput.style.color = 'var(--tg-theme-text-color, #000000)';
+
+    const carrierResults = document.createElement('div');
+    carrierResults.style.display = 'none';
+    carrierResults.style.flexDirection = 'column';
+    carrierResults.style.gap = '4px';
+    carrierResults.style.maxHeight = '200px';
+    carrierResults.style.overflowY = 'auto';
+
+    carrierContainer.appendChild(carrierTitle);
+    carrierContainer.appendChild(carrierInput);
+    carrierContainer.appendChild(carrierResults);
 
     // Create button container
     const buttonContainer = document.createElement('div');
@@ -513,6 +568,7 @@ function showAddTrackingDialog(): void {
     buttonContainer.appendChild(addButton);
     popupContainer.appendChild(title);
     popupContainer.appendChild(input);
+    popupContainer.appendChild(carrierContainer);
     popupContainer.appendChild(buttonContainer);
 
     // Create modal container
@@ -533,13 +589,65 @@ function showAddTrackingDialog(): void {
     document.body.appendChild(modal);
     
     // Handle cancel
-    cancelButton.addEventListener('click', () => {
+    const closeModal = () => {
         document.body.removeChild(modal);
         tg.MainButton.show();
+    };
+    
+    cancelButton.addEventListener('click', closeModal);
+    
+    // Handle carrier input
+    let selectedCarrier: {key: number, name_en: string} | null = null;
+    
+    carrierInput.addEventListener('input', () => {
+        const searchTerm = carrierInput.value.toLowerCase();
+        carrierResults.innerHTML = '';
+        
+        if (!searchTerm) {
+            carrierResults.style.display = 'none';
+            return;
+        }
+        
+        const filtered = carriers.filter(carrier => 
+            carrier.name_en.toLowerCase().includes(searchTerm)
+        );
+        
+        if (filtered.length === 0) {
+            carrierResults.style.display = 'none';
+            return;
+        }
+        
+        carrierResults.style.display = 'flex';
+        
+        filtered.forEach(carrier => {
+            const option = document.createElement('div');
+            option.textContent = carrier.name_en;
+            option.style.padding = '8px 12px';
+            option.style.borderRadius = '4px';
+            option.style.cursor = 'pointer';
+            option.style.backgroundColor = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
+            option.style.color = 'var(--tg-theme-text-color, #000000)';
+            
+            option.addEventListener('click', () => {
+                selectedCarrier = carrier;
+                carrierInput.value = carrier.name_en;
+                carrierResults.style.display = 'none';
+            });
+            
+            option.addEventListener('mouseenter', () => {
+                option.style.backgroundColor = 'var(--tg-theme-hint-color, #707579)';
+            });
+            
+            option.addEventListener('mouseleave', () => {
+                option.style.backgroundColor = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
+            });
+            
+            carrierResults.appendChild(option);
+        });
     });
     
     // Handle add
-    addButton.addEventListener('click', () => {
+    addButton.addEventListener('click', async () => {
         const trackingNumber = input.value.trim();
         
         if (!trackingNumber) {
@@ -547,9 +655,35 @@ function showAddTrackingDialog(): void {
             return;
         }
         
-        register_one_tracking_number(trackingNumber);
-        document.body.removeChild(modal);
-        tg.MainButton.show();
+        // First try without carrier
+        if (!carrierContainer.style.display || carrierContainer.style.display === 'none') {
+            const result = await register_one_tracking_number(trackingNumber);
+            
+            if (result === 0) {
+                closeModal();
+                return;
+            } else if (result === 1) {
+                // Show carrier selection
+                carrierContainer.style.display = 'flex';
+                input.disabled = true;
+                setTimeout(() => carrierInput.focus(), 100);
+                return;
+            }
+        } else {
+            // Carrier selection is visible
+            if (!selectedCarrier) {
+                tg.showAlert('Please select a carrier');
+                return;
+            }
+            
+            const result = await register_one_tracking_number(trackingNumber, selectedCarrier.key);
+            
+            if (result === 0) {
+                closeModal();
+            } else {
+                tg.showAlert('Failed to add tracking number');
+            }
+        }
     });
     
     // Focus input when modal appears
@@ -558,8 +692,7 @@ function showAddTrackingDialog(): void {
     // Close modal when clicking outside
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
-            document.body.removeChild(modal);
-            tg.MainButton.show();
+            closeModal();
         }
     });
 }
@@ -697,13 +830,14 @@ async function get_tracking_data(tracking_number: string): Promise<JSON | undefi
 
 }
 
-// TODO: test this later iykyk
 /// Function to register a single tracking number, called from the popup element that opens on the main button
-async function register_one_tracking_number(tracking_number: string) {
+async function register_one_tracking_number(tracking_number: string, carrier?: number): Promise<number | undefined> {
+    // return 0 for OK, 1 for retry with carrier
+
     // create the json to send as payload
     const prime_json_data = {
         "number": tracking_number,
-        "carrier": Number(null)
+        "carrier": carrier ? carrier : Number(null)
     };
     // console.log(prime_json_data);
     const path = '/register_tracking_number';
@@ -730,11 +864,15 @@ async function register_one_tracking_number(tracking_number: string) {
             // user doesn't exist yet, call to create user, then retry the original call
             const second_prime_response = create_user_request(headers,path,prime_json_data);
             // user created, second response successful
-            const response_json = await second_prime_response.then((json) => json).catch((err) => console.log(err));
-            console.log(response_json)
-            console.log("registered the number successfully")
+            // console.log(response_json);
+            // console.log("registered the number successfully");
+            return 0
+        } else if (prime_response.status == 530) {
+            // TODO: resolve 530 response, specify carrier in registering a number
+            return 1
         } else if (prime_response.ok) {
             console.log("registered the number successfully");
+            return 0
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
         } else {
@@ -743,7 +881,7 @@ async function register_one_tracking_number(tracking_number: string) {
         }
     } catch (error) {
         /* the more errors you get the smarter you are */   
-        console.log('some other error:', error);
+        throw error;
     }; 
 }
 
