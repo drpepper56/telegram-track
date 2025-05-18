@@ -465,7 +465,7 @@ function showAddTrackingDialog(): void {
 
     // Load carriers data
     let carriers: {key: number, name_en: string}[] = [];
-    fetch('.../carriers_data/carriers.csv')
+    fetch('../../carriers_data/carriers.csv')
         .then(response => response.text())
         .then(data => {
             const lines = data.split('\n');
