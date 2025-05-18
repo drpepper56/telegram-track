@@ -248,7 +248,7 @@ const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
 // const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
 // const BACKEND_LINK = 'http://127.0.0.1:8080';
 /// import the csv carrier list as array from carriers.ts
-const { getKeyNameList } = require('./carriers.js');
+import {getKeyNameList} from './carriers.js';
 
 /*
     STATE HANDLING IS SOMETHING WE DO NOW

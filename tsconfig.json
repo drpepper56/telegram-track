@@ -3,13 +3,14 @@
       /* Visit https://aka.ms/tsconfig to read more about this file */
   
       /* Language and Environment */
-      "target": "ES6",        // Modern JavaScript
+      "target": "ES2020", // Specify ECMAScript target version
       "lib": ["DOM", "ES2020"], // Add "DOM" for browser environment, like Telegram Mini App
   
       /* Modules */
-      "module": "CommonJS",
+      "module": "ESNext", // Specify module code generation (CommonJS, ESNext, etc.)
       "rootDir": "./", // Specify the root directory of input files
-      // "resolveJsonModule": true, // Enable importing .json files
+      "resolveJsonModule": true, // Enable importing .json files
+      "moduleResolution": "node", // Specify module resolution strategy: "node" or "classic"
   
       /* JavaScript Support */
       "allowJs": true, // Allow JavaScript files to be compiled
