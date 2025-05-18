@@ -471,7 +471,7 @@ function showAddTrackingDialog(): void {
             const lines = data.split('\n');
             carriers = lines.slice(1) // skip header
                 .map(line => {
-                    const [key, name_en, name_cn, name_hk, url] = line.split(',');
+                    const [key, name_en] = line.split(',');
                     return {key: Number(key), name_en};
                 })
                 .filter(carrier => !isNaN(carrier.key) && carrier.name_en);
@@ -479,7 +479,7 @@ function showAddTrackingDialog(): void {
         .catch(error => {
             console.error('Error loading carriers:', error);
         });
-    carriers && console.log('loaded data', carriers[0].name_en);
+    console.log('loaded data', carriers[0].name_en);
 
     const popupContainer = document.createElement('div');
     popupContainer.style.padding = '16px';
