@@ -247,6 +247,8 @@ function formatEventTime(time: time_raw): string {
 const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
 // const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
 // const BACKEND_LINK = 'http://127.0.0.1:8080';
+/// import the csv carrier list as array from carriers.ts
+import { getKeyNameList } from './carriers.js';
 
 /*
     STATE HANDLING IS SOMETHING WE DO NOW
@@ -464,22 +466,7 @@ function showAddTrackingDialog(): void {
     tg.MainButton.hide();
 
     // Load carriers data
-    let carriers: {key: number, name_en: string}[] = [];
-    fetch('../carriers_data/carriers.csv')
-        .then(response => response.text())
-        .then(data => {
-            const lines = data.split('\n');
-            carriers = lines.slice(1) // skip header
-                .map(line => {
-                    const [key, name_en] = line.split(',');
-                    return {key: Number(key), name_en};
-                })
-                .filter(carrier => !isNaN(carrier.key) && carrier.name_en);
-        })
-        .catch(error => {
-            console.error('Error loading carriers:', error);
-        });
-    console.log('loaded data', carriers[0].name_en);
+    let carriers: {key: number, name_en: string}[] = getKeyNameList()
 
     const popupContainer = document.createElement('div');
     popupContainer.style.padding = '16px';
