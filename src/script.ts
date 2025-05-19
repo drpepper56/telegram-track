@@ -569,7 +569,7 @@ async function handleRetrackNumber(tracking_number: string) {
         return;
     } else if (removed_code == 534) {
         // already set to subscribed
-        tg.showAlert("Set to subscribed");
+        tg.showAlert("Already set to subscribed");
         return;
     } else {
         throw new Error("Failed to remove tracking number");
