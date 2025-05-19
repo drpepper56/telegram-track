@@ -3,16 +3,9 @@
 
     Save the tracking number with a tag for the package set by the user or a default in telegram storage.
 
-    In run time memory save a list of {tracking_number, package_tag, {tracking_events}}, this will be requested only when the
-    app is opened normally, not via a notification about ta tracking update.
-
     When the app is opened with notification parameters {tracking number}, only request the events for that number
 
     Add button to delete a tracking number, from the telegram memory list as well as from the database relation list
-
-    Put the (fries in the bag) add tracking number function in the telegram main button
-
-
 
 */
 
@@ -34,6 +27,7 @@ interface PackageData {
     latest_event?: event;
     providers_data: tracking_provider_provided_events[];
     time_metrics?: time_metrics;
+    is_user_tracked?: boolean
 }
 interface tracking_provider_provided_events {
      provider_name?: string;
@@ -80,6 +74,7 @@ interface delivery_estimate {
 
 /*      DISPLAY FUNCTION FOR THE @PackageData STRUCTURE         */
 
+/// too big
 /// return a html element to display info from the @PackageData structure
 function createPackageElement(pkg: PackageData): HTMLElement {
     const container = document.createElement('div');
@@ -133,6 +128,62 @@ function createPackageElement(pkg: PackageData): HTMLElement {
         const metrics = createTimeMetricsElement(pkg.time_metrics);
         container.appendChild(metrics);
     }
+
+    // Button container
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'package-buttons';
+    buttonContainer.style.display = 'grid';
+    buttonContainer.style.gridTemplateColumns = '1fr 1fr';
+    buttonContainer.style.gap = '10px';
+    buttonContainer.style.marginTop = '20px';
+
+    // Track/Untrack button - conditionally shown based on is_user_tracked
+    if (pkg.is_user_tracked !== undefined) {
+        if (pkg.is_user_tracked) {
+            // Untrack button
+            const untrackButton = document.createElement('button');
+            untrackButton.textContent = 'Untrack';
+            untrackButton.className = 'untrack-button';
+            untrackButton.onclick = () => {
+                tg.showConfirm('Are you sure you want to stop tracking this package?', (confirmed: boolean) => {
+                    if (confirmed) {
+                        untrackNumber(pkg.tracking_number);
+                    }
+                });
+            };
+            untrackButton.style.width = '100%';
+            untrackButton.style.padding = '8px';
+            buttonContainer.appendChild(untrackButton);
+        } else {
+            // Track button
+            const trackButton = document.createElement('button');
+            trackButton.textContent = 'Track';
+            trackButton.className = 'track-button';
+            trackButton.onclick = () => {
+                retrackNumber(pkg.tracking_number);
+            };
+            trackButton.style.width = '100%';
+            trackButton.style.padding = '8px';
+            buttonContainer.appendChild(trackButton);
+        }
+    }
+
+    // Remove button
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove';
+    removeButton.className = 'remove-button';
+    removeButton.onclick = () =>  {
+        tg.showConfirm('Are you sure you want to remove this package?', (confirmed: boolean) => {
+            if (confirmed) {
+                removeTrackingNumber(pkg.tracking_number);
+            }
+        });
+    };
+    removeButton.style.width = '100%';
+    removeButton.style.padding = '8px';
+    buttonContainer.appendChild(removeButton);
+
+    container.appendChild(buttonContainer);
 
     console.info(container);
 
@@ -256,7 +307,7 @@ const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
 /// import the csv carrier list as array from carriers.ts 
 import {getKeyNameList} from './carriers.js';
 
-/*      STATE HANDLING IS SOMETHING WE DO NOW       */
+/*      STATE HANDLING      */
 
 let currentView: 'main' | 'details' | 'notification_details' = 'main';
 let currentTrackingNumber: string | null = null;
@@ -271,6 +322,8 @@ let NOTIFICATION_DATA: PackageData | undefined;
 
     Init TWA
 
+    TODO: if all data gets called is up to notification handler and the init function to figure out later
+
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
@@ -284,11 +337,10 @@ async function initApp() {
     tg.MainButton.show();
 
 
-    // TODO: if all data gets called is up to notification handler and the init function to figure out later
     // const notification_present = await notification_handler();
     // if (notification_present) {
-    //     // open tracking details page with notification package details
-    //     return;
+        // // open tracking details page with notification package details
+    //      return;
     // }
     
     // Load data and pass directly to render function
@@ -310,7 +362,6 @@ const mainView = document.getElementById('main-view') as HTMLElement;
 const detailsView = document.getElementById('details-view') as HTMLElement;
 const trackingList = document.getElementById('tracking-list') as HTMLElement;
 const emptyState = document.getElementById('empty-state') as HTMLElement;
-const removeBtn = document.getElementById('remove-btn') as HTMLButtonElement;
 
 /*
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -386,17 +437,6 @@ function renderTrackingDetails(tracking_details: PackageData): void {
     const trackingDetailsElement = createPackageElement(tracking_details)
     detailsView.appendChild(trackingDetailsElement);
 }
-
-// Set up remove button
-removeBtn.addEventListener('click', () => {
-    if (currentTrackingNumber) {
-        tg.showConfirm('Are you sure you want to stop tracking this package?', (confirmed: boolean) => {
-            if (confirmed) {
-                removeTrackingNumber(currentTrackingNumber!);
-            }
-        });
-    }
-});
 
 /// Back to main view
 function backToMainView(): void {
@@ -738,6 +778,8 @@ function showAddTrackingDialog(): void {
     API RELATED FUNCTIONS, HTTP REQUESTS
     
     TODO: fix these, add proper returns and error handling
+    TODO: move the "double" request building to a helper function
+    TODO: create alerts for the user when a request is completed
 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
@@ -912,7 +954,6 @@ async function register_one_tracking_number(tracking_number: string, carrier?: n
             // console.log("registered the number successfully");
             return 0
         } else if (prime_response.status == 530) {
-            // TODO: resolve 530 response, specify carrier in registering a number
             return 1
         } else if (prime_response.ok) {
             console.log("registered the number successfully");
@@ -1022,11 +1063,122 @@ async function removeTrackingNumber(tracking_number: string): Promise<number | u
             // console.log("registered the number successfully");
             return 0
         } else if (prime_response.ok) {
-            await loadTrackedPackages();
             if (currentView === 'details') {
+                // reinitialize and go back to main view
+                // TODO: show a alert to the user
+                initApp();
                 backToMainView();
+                return 0
             }
-            renderTrackingList();
+        } else if (!prime_response.ok) {
+            console.log('Response status error', prime_response.status, prime_response.json());  
+        } else {
+            /* the more errors you get the smarter you are */
+            throw new Error('unknown error');
+        }
+    } catch (error) {
+        /* the more errors you get the smarter you are */   
+        throw error;
+    }; 
+}
+
+/// Function for untracking a tracking number from in the user's options
+async function untrackNumber(tracking_number: string): Promise<number | undefined> {
+    // return 0 for OK, 1 for error
+
+    // create the json to send as payload
+    const prime_json_data = {
+        "number": tracking_number
+    };
+    // console.log(prime_json_data);
+    const path = '/stop_tracking_number';
+    const user_id_hash = await get_user_id_hash();
+    // console.log(prime_json_data);
+
+    try {
+        // headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin,
+            'X-User-ID-Hash': user_id_hash
+        }
+        // send the primary message
+        const prime_response = await fetch(BACKEND_LINK + path, {
+            method: 'post',
+            mode: 'cors',
+            headers,
+            body: JSON.stringify(prime_json_data)
+        });
+
+        console.log('prime_response', prime_response);
+
+        // /* the more errors you get the smarter you are */
+        // const responseClone = response.clone();
+        if (prime_response.status == 520) {
+            // user doesn't exist yet, call to create user, then retry the original call
+            const second_prime_response = create_user_request(headers,path,prime_json_data);
+            // user created, second response successful
+            // console.log(response_json);
+            // console.log("registered the number successfully");
+            return 0
+        } else if (prime_response.ok) {
+            console.log('untracked number');
+            // TODO: show a alert to the user
+            return 0
+        } else if (!prime_response.ok) {
+            console.log('Response status error', prime_response.status, prime_response.json());  
+        } else {
+            /* the more errors you get the smarter you are */
+            throw new Error('unknown error');
+        }
+    } catch (error) {
+        /* the more errors you get the smarter you are */   
+        throw error;
+    }; 
+}
+
+/// Function for retracking a untracked number from in the user's options
+async function retrackNumber(tracking_number: string): Promise<number | undefined> {
+    // return 0 for OK, 1 for error
+
+    // create the json to send as payload
+    const prime_json_data = {
+        "number": tracking_number
+    };
+    // console.log(prime_json_data);
+    const path = '/retrack_stopped_number';
+    const user_id_hash = await get_user_id_hash();
+    // console.log(prime_json_data);
+
+    try {
+        // headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin,
+            'X-User-ID-Hash': user_id_hash
+        }
+        // send the primary message
+        const prime_response = await fetch(BACKEND_LINK + path, {
+            method: 'post',
+            mode: 'cors',
+            headers,
+            body: JSON.stringify(prime_json_data)
+        });
+
+        console.log('prime_response', prime_response);
+
+        // /* the more errors you get the smarter you are */
+        // const responseClone = response.clone();
+        if (prime_response.status == 520) {
+            // user doesn't exist yet, call to create user, then retry the original call
+            const second_prime_response = create_user_request(headers,path,prime_json_data);
+            // user created, second response successful
+            // console.log(response_json);
+            // console.log("registered the number successfully");
+            return 0
+        } else if (prime_response.ok) {
+            console.log('retracked number');
+            // TODO: show a alert to the user
             return 0
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
