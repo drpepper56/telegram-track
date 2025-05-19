@@ -1124,6 +1124,9 @@ async function untrackNumber(tracking_number: string): Promise<number | undefine
         } else if (prime_response.ok) {
             console.log('untracked number');
             // TODO: show a alert to the user
+            // reinitialize and open tracking details view again
+            initApp();
+            showTrackingDetails(tracking_number);
             return 0
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
@@ -1179,6 +1182,9 @@ async function retrackNumber(tracking_number: string): Promise<number | undefine
         } else if (prime_response.ok) {
             console.log('retracked number');
             // TODO: show a alert to the user
+            // reinitialize and open tracking details view again
+            initApp();
+            showTrackingDetails(tracking_number);
             return 0
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
