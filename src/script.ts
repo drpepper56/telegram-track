@@ -80,6 +80,8 @@ function createPackageElement(pkg: PackageData): HTMLElement {
     const container = document.createElement('div');
     container.className = 'package-container';
 
+    console.log('pkg.is_user_tracked', pkg.is_user_tracked);
+
     // Header with tracking number and tag
     const header = document.createElement('div');
     header.className = 'package-header';
