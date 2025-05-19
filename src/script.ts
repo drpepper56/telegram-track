@@ -18,9 +18,13 @@
 
 
 /* 
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     TYPE "SAFETY"
 
     tracking data json form on the server
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
 /// Structure for full package data
@@ -74,9 +78,7 @@ interface delivery_estimate {
     to?: string;
 }
 
-/*
-    DISPLAY FUNCTION FOR THE @PackageData STRUCTURE
-*/
+/*      DISPLAY FUNCTION FOR THE @PackageData STRUCTURE         */
 
 /// return a html element to display info from the @PackageData structure
 function createPackageElement(pkg: PackageData): HTMLElement {
@@ -241,18 +243,20 @@ function formatEventTime(time: time_raw): string {
 }
 
 /*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     CONSTANTS
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
 const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
 // const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
 // const BACKEND_LINK = 'http://127.0.0.1:8080';
-/// import the csv carrier list as array from carriers.ts
+/// import the csv carrier list as array from carriers.ts 
 import {getKeyNameList} from './carriers.js';
 
-/*
-    STATE HANDLING IS SOMETHING WE DO NOW
-*/
+/*      STATE HANDLING IS SOMETHING WE DO NOW       */
 
 let currentView: 'main' | 'details' | 'notification_details' = 'main';
 let currentTrackingNumber: string | null = null;
@@ -263,7 +267,11 @@ let NOTIFICATION_DATA: PackageData | undefined;
 
 
 /*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     Init TWA
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
 
@@ -274,6 +282,9 @@ async function initApp() {
     tg.MainButton.setText('ADD TRACKING NUMBER');
     tg.MainButton.onClick(showAddTrackingDialog);
     tg.MainButton.show();
+
+    // show back button and assign the back function to it
+    tg.BackButton.show();
 
     // TODO: if all data gets called is up to notification handler and the init function to figure out later
     // const notification_present = await notification_handler();
@@ -289,19 +300,26 @@ async function initApp() {
 }
 
 /*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     INIT ELEMENTS
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
 // DOM Elements
 const mainView = document.getElementById('main-view') as HTMLElement;
 const detailsView = document.getElementById('details-view') as HTMLElement;
 const trackingList = document.getElementById('tracking-list') as HTMLElement;
-const eventsList = document.getElementById('events-list') as HTMLElement;
 const emptyState = document.getElementById('empty-state') as HTMLElement;
 const removeBtn = document.getElementById('remove-btn') as HTMLButtonElement;
 
-/* 
+/*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     ELEMENTS FUNCTIONS
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
 /// Update empty state visibility
@@ -370,10 +388,34 @@ function renderTrackingDetails(tracking_details: PackageData): void {
     detailsView.appendChild(trackingDetailsElement);
 }
 
+// Set up remove button
+removeBtn.addEventListener('click', () => {
+    if (currentTrackingNumber) {
+        tg.showConfirm('Are you sure you want to stop tracking this package?', (confirmed: boolean) => {
+            if (confirmed) {
+                removeTrackingNumber(currentTrackingNumber!);
+            }
+        });
+    }
+});
 
+/// Back to main view
+function backToMainView(): void {
+    currentView = 'main';
+    mainView.style.display = 'block';
+    detailsView.style.display = 'none';
+    currentTrackingNumber = null;
+}
+
+// Back button handling
+tg.BackButton.onClick(backToMainView);
 
 /*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     NOTIFICATION HANDLERS
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
 async function notification_handler(): Promise<boolean> {
@@ -408,7 +450,11 @@ async function notification_handler(): Promise<boolean> {
 }
 
 /*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     UTILITY FUNCTIONS
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
 /// hash function for putting userID hash in every request header //TODO: put everywhere
@@ -441,19 +487,12 @@ async function get_user_details() {
     return user_details;
 }
 
-
-
-
-/// Back to main view
-function backToMainView(): void {
-    currentView = 'main';
-    // mainView.style.display = 'block';
-    // detailsView.style.display = 'none';
-    // currentTrackingNumber = null;
-}
-
 /*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     POP-UP FUNCTIONS
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
 
@@ -693,9 +732,14 @@ function showAddTrackingDialog(): void {
 
 
 /*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
     API RELATED FUNCTIONS, HTTP REQUESTS
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
+/// this is so bad
 /// Function for creating a user and resending a request if the user has been created
 async function create_user_request(headers: any, prime_path: string, prime_json_data: any): Promise<Response | undefined> {
     console.log("USER DOESN'T EXIST YET");
@@ -882,8 +926,8 @@ async function register_one_tracking_number(tracking_number: string, carrier?: n
     }; 
 }
 
-// Function to load all the user's tracked packages info, called when app is started 
-// or when user exists the notification screen
+/// Function to load all the user's tracked packages info, called when app is started 
+/// or when user exists the notification screen
 async function loadTrackedPackages(): Promise<PackageData[] | undefined> {
 
     // no json to send as payload, user is in the header 
@@ -935,6 +979,64 @@ async function loadTrackedPackages(): Promise<PackageData[] | undefined> {
     }; 
 }
 
+/// Function for removing a tracking number from the user's list
+async function removeTrackingNumber(tracking_number: string): Promise<number | undefined> {
+    // return 0 for OK, 1 for error
+
+    // create the json to send as payload
+    const prime_json_data = {
+        "number": tracking_number
+    };
+    // console.log(prime_json_data);
+    const path = '/delete_tracking_number';
+    const user_id_hash = await get_user_id_hash();
+    // console.log(prime_json_data);
+
+    try {
+        // headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin,
+            'X-User-ID-Hash': user_id_hash
+        }
+        // send the primary message
+        const prime_response = await fetch(BACKEND_LINK + path, {
+            method: 'post',
+            mode: 'cors',
+            headers,
+            body: JSON.stringify(prime_json_data)
+        });
+
+        console.log('prime_response', prime_response);
+
+        // /* the more errors you get the smarter you are */
+        // const responseClone = response.clone();
+        if (prime_response.status == 520) {
+            // user doesn't exist yet, call to create user, then retry the original call
+            const second_prime_response = create_user_request(headers,path,prime_json_data);
+            // user created, second response successful
+            // console.log(response_json);
+            // console.log("registered the number successfully");
+            return 0
+        } else if (prime_response.ok) {
+            await loadTrackedPackages();
+            if (currentView === 'details') {
+                backToMainView();
+            }
+            renderTrackingList();
+            return 0
+        } else if (!prime_response.ok) {
+            console.log('Response status error', prime_response.status, prime_response.json());  
+        } else {
+            /* the more errors you get the smarter you are */
+            throw new Error('unknown error');
+        }
+    } catch (error) {
+        /* the more errors you get the smarter you are */   
+        throw error;
+    }; 
+}
+
 // show the stuff from the notification in the dom
 function notify(payload: JSON) {  
     // let update_package_objetto;
@@ -950,41 +1052,12 @@ function notify(payload: JSON) {
 }
 
 /*
-    ONLY KNOWN WAY TO UPDATE THE DOM WITH VALUES DYNAMICALLY
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+    START APP
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    const statusLabel = document.getElementById('statusLabel')!;
-    const refreshBtn = document.getElementById('refreshBtn')!;
-    
-    // Function to update label
-    function updateLabel(text: string) {
-        statusLabel.textContent = text;
-    }
-    
-    // Initial update
-    updateLabel(`Hello, ${tg.initDataUnsafe.user?.first_name || 'User'}!`);
-    
-    // Example with button click
-    refreshBtn.addEventListener('click', () => {
-        updateLabel('Refreshing...');
-
-        /*
-            two function calls added for testing since im a dumbass without react
-            TODO: delete later
-        */
-        notification_handler();
-        
-        // Simulate async operation
-        setTimeout(() => {
-            updateLabel(`Last updated: ${new Date().toLocaleTimeString()}`);
-        }, 1000);
-    });
-})
-
-// Back button handling
-tg.BackButton.onClick(backToMainView);
 
 initApp();
 tg.ready();
