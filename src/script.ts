@@ -76,7 +76,7 @@ interface delivery_estimate {
 
 /// too big
 /// return a html element to display info from the @PackageData structure
-function createPackageElement(pkg: PackageData): HTMLElement {
+function createPackageElement(pkg: PackageData) {
     const container = document.createElement('div');
     container.className = 'package-container';
 
@@ -147,7 +147,7 @@ function createPackageElement(pkg: PackageData): HTMLElement {
             untrackButton.textContent = 'Untrack';
             untrackButton.className = 'untrack-button';
             untrackButton.onclick = () => {
-                untrackNumber(pkg.tracking_number);
+                handleUntrackNumber(pkg.tracking_number);
             };
             untrackButton.style.width = '100%';
             untrackButton.style.padding = '10px';
@@ -164,7 +164,7 @@ function createPackageElement(pkg: PackageData): HTMLElement {
             trackButton.textContent = 'Track';
             trackButton.className = 'track-button';
             trackButton.onclick = () => {
-                retrackNumber(pkg.tracking_number);
+                handleRetrackNumber(pkg.tracking_number);
             };
             trackButton.style.width = '100%';
             trackButton.style.padding = '10px';
@@ -185,7 +185,7 @@ function createPackageElement(pkg: PackageData): HTMLElement {
     removeButton.onclick = () =>  {
         tg.showConfirm('Are you sure you want to remove this package?', (confirmed: boolean) => {
             if (confirmed) {
-                removeTrackingNumber(pkg.tracking_number);
+                handleRemoveTrackingNumber(pkg.tracking_number);
             }
         });
     };
@@ -204,9 +204,9 @@ function createPackageElement(pkg: PackageData): HTMLElement {
     wrapper.appendChild(container);
     wrapper.appendChild(buttonContainer);
 
-    console.info(wrapper);
+    // console.info(wrapper);
 
-    return wrapper;
+    return wrapper
 }
 /// return a html element to display info from @event
 function createEventElement(event: event, title?: string): HTMLElement {
@@ -364,6 +364,7 @@ async function initApp() {
     
     // Load data and pass directly to render function
     const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+    currentTrackingNumber = null; // Reset tracking number
     USER_PACKAGES_DATA = trackingData; // Update global state
     renderTrackingList(); // Pass data directly
 }
@@ -459,10 +460,14 @@ function renderTrackingDetails(tracking_details: PackageData): void {
 
 /// Back to main view
 function backToMainView(): void {
+    console.log('before currentTrackingNumber', currentTrackingNumber)
+
     currentView = 'main';
     mainView.style.display = 'block';
     detailsView.style.display = 'none';
     currentTrackingNumber = null;
+
+    console.log('after  currentTrackingNumber', currentTrackingNumber)
 
     // show back button and assign the back function to it
     tg.BackButton.hide();
@@ -546,6 +551,69 @@ async function get_user_details() {
     }
 
     return user_details;
+}
+
+/// function for handling remove number request
+async function handleRetrackNumber(tracking_number: string) {
+    const removed_code = await retrackNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
+    if (removed_code == 0) {
+        currentTrackingNumber = null;
+        USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+        tg.showAlert("Set to subscribed");
+        backToMainView();
+        renderTrackingList();
+        return;
+    } else if (removed_code == 533) {
+        // package has been marked delivered so it can't be re-tracked
+        tg.showAlert("Package has been marked delivered so it can't be re-tracked");
+        return;
+    } else if (removed_code == 534) {
+        // already set to subscribed
+        tg.showAlert("Set to subscribed");
+        return;
+    } else {
+        throw new Error("Failed to remove tracking number");
+    }
+}
+
+/// function for handling remove number request
+async function handleUntrackNumber(tracking_number: string) {
+    const removed_code = await untrackNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
+    if (removed_code == 0) {
+        currentTrackingNumber = null;
+        USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+        tg.showAlert("Set to subscribed");
+        backToMainView();
+        renderTrackingList();
+        return;
+    }
+    if (removed_code == 535) {
+        // package has been marked delivered so it can't be re-tracked
+        tg.showAlert("Package has been marked delivered so it can't be re-tracked");
+        return;
+    } else {
+        throw new Error("Failed to remove tracking number");
+    }
+}
+
+/// function for handling untrack number request
+async function handleRemoveTrackingNumber(tracking_number: string) {
+    const removed_code = await removeTrackingNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
+    if (removed_code == 0) {
+        // untracked number for the user
+        currentTrackingNumber = null;
+        USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+        tg.showAlert("Number won't be tracked anymore");
+        backToMainView();
+        renderTrackingList();
+        return;
+    } else if (removed_code == 536) {
+        // was already untracked
+        tg.showAlert("Number was already untracked");
+        return;
+    } else {
+        throw new Error("Failed to remove tracking number");
+    }
 }
 
 /*
