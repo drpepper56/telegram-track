@@ -129,18 +129,18 @@ function createPackageElement(pkg: PackageData): HTMLElement {
         container.appendChild(metrics);
     }
 
-    // Button container
+    // Button container - placed outside the white container
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'package-buttons';
     buttonContainer.style.display = 'grid';
     buttonContainer.style.gridTemplateColumns = '1fr 1fr';
     buttonContainer.style.gap = '10px';
-    buttonContainer.style.marginTop = '20px';
+    buttonContainer.style.marginTop = '10px';
 
     // Track/Untrack button - conditionally shown based on is_user_tracked
     if (pkg.is_user_tracked !== undefined) {
         if (pkg.is_user_tracked) {
-            // Untrack button
+            // Untrack button (yellow)
             const untrackButton = document.createElement('button');
             untrackButton.textContent = 'Untrack';
             untrackButton.className = 'untrack-button';
@@ -152,10 +152,16 @@ function createPackageElement(pkg: PackageData): HTMLElement {
                 });
             };
             untrackButton.style.width = '100%';
-            untrackButton.style.padding = '8px';
+            untrackButton.style.padding = '10px';
+            untrackButton.style.borderRadius = '8px';
+            untrackButton.style.border = 'none';
+            untrackButton.style.backgroundColor = '#ffc107'; // Yellow
+            untrackButton.style.color = '#000';
+            untrackButton.style.fontWeight = 'bold';
+            untrackButton.style.cursor = 'pointer';
             buttonContainer.appendChild(untrackButton);
         } else {
-            // Track button
+            // Track button (blue)
             const trackButton = document.createElement('button');
             trackButton.textContent = 'Track';
             trackButton.className = 'track-button';
@@ -163,12 +169,18 @@ function createPackageElement(pkg: PackageData): HTMLElement {
                 retrackNumber(pkg.tracking_number);
             };
             trackButton.style.width = '100%';
-            trackButton.style.padding = '8px';
+            trackButton.style.padding = '10px';
+            trackButton.style.borderRadius = '8px';
+            trackButton.style.border = 'none';
+            trackButton.style.backgroundColor = '#2196F3'; // Blue
+            trackButton.style.color = '#fff';
+            trackButton.style.fontWeight = 'bold';
+            trackButton.style.cursor = 'pointer';
             buttonContainer.appendChild(trackButton);
         }
     }
 
-    // Remove button
+    // Remove button (red)
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
     removeButton.className = 'remove-button';
@@ -180,14 +192,23 @@ function createPackageElement(pkg: PackageData): HTMLElement {
         });
     };
     removeButton.style.width = '100%';
-    removeButton.style.padding = '8px';
+    removeButton.style.padding = '10px';
+    removeButton.style.borderRadius = '8px';
+    removeButton.style.border = 'none';
+    removeButton.style.backgroundColor = '#f44336'; // Red
+    removeButton.style.color = '#fff';
+    removeButton.style.fontWeight = 'bold';
+    removeButton.style.cursor = 'pointer';
     buttonContainer.appendChild(removeButton);
 
-    container.appendChild(buttonContainer);
+    // Create a wrapper to separate the white content from buttons
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(container);
+    wrapper.appendChild(buttonContainer);
 
-    console.info(container);
+    console.info(wrapper);
 
-    return container;
+    return wrapper;
 }
 /// return a html element to display info from @event
 function createEventElement(event: event, title?: string): HTMLElement {
