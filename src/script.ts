@@ -283,8 +283,6 @@ async function initApp() {
     tg.MainButton.onClick(showAddTrackingDialog);
     tg.MainButton.show();
 
-    // show back button and assign the back function to it
-    tg.BackButton.show();
 
     // TODO: if all data gets called is up to notification handler and the init function to figure out later
     // const notification_present = await notification_handler();
@@ -405,6 +403,9 @@ function backToMainView(): void {
     mainView.style.display = 'block';
     detailsView.style.display = 'none';
     currentTrackingNumber = null;
+
+    // show back button and assign the back function to it
+    tg.BackButton.hide();
 }
 
 // Back button handling
@@ -497,9 +498,8 @@ async function get_user_details() {
 
 
 /// Show add tracking number dialog
-// TODO: add optional add carrier drop down window, use the csv file from 17track docs
 // TODO: user should add a name tag to the package that will be saved in the telegram env memory
-// TODO: resolve 530 response, specify carrier in registering a number
+// TODO: make carrier option always visible, if the user doesn't select a carrier, try to register the number without it
 function showAddTrackingDialog(): void {
     // disable the button, make enabled after removing the elements added in this function
     tg.MainButton.hide();
@@ -735,11 +735,13 @@ function showAddTrackingDialog(): void {
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
     API RELATED FUNCTIONS, HTTP REQUESTS
+    
+    TODO: fix these, add proper returns and error handling
 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
-/// this is so bad
+/// this is the worst one
 /// Function for creating a user and resending a request if the user has been created
 async function create_user_request(headers: any, prime_path: string, prime_json_data: any): Promise<Response | undefined> {
     console.log("USER DOESN'T EXIST YET");
@@ -1037,7 +1039,8 @@ async function removeTrackingNumber(tracking_number: string): Promise<number | u
     }; 
 }
 
-// show the stuff from the notification in the dom
+/// this shouldn't even be here
+/// show the stuff from the notification in the dom
 function notify(payload: JSON) {  
     // let update_package_objetto;
     console.log("the thing: " + payload);
