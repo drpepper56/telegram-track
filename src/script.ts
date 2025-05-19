@@ -363,6 +363,7 @@ async function showTrackingDetails(tracking_number: string): Promise<void> {
     currentView = 'details';
     mainView.style.display = 'none';
     detailsView.style.display = 'block';
+    tg.BackButton.show();
     
     // Update header with tracking number
     const detailsHeader = document.getElementById('details-header') as HTMLElement;
