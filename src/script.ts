@@ -147,11 +147,7 @@ function createPackageElement(pkg: PackageData): HTMLElement {
             untrackButton.textContent = 'Untrack';
             untrackButton.className = 'untrack-button';
             untrackButton.onclick = () => {
-                tg.showConfirm('Are you sure you want to stop tracking this package?', (confirmed: boolean) => {
-                    if (confirmed) {
-                        untrackNumber(pkg.tracking_number);
-                    }
-                });
+                untrackNumber(pkg.tracking_number);
             };
             untrackButton.style.width = '100%';
             untrackButton.style.padding = '10px';
@@ -801,8 +797,18 @@ function showAddTrackingDialog(): void {
     API RELATED FUNCTIONS, HTTP REQUESTS
     
     TODO: fix these, add proper returns and error handling
-    TODO: move the "double" request building to a helper function
+    TODO: move the "double" request building to a helper function that actually works logically
     TODO: create alerts for the user when a request is completed
+
+    list of custom 5XX codes:
+            520 - user doesn't exist yet, client should send request to create user
+    TODO:   521 - user already exists, handle error
+    TODO:   525 - user doesn't have access to that number, no relation record found
+            530 - carrier not found, client should send a register number request that includes a carrier
+            533 - package has been marked delivered so it can't be re-tracked
+            534 - already set to subscribed
+            535 - already set to unsubscribed
+            536 - no relation record found to delete
 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
@@ -1085,6 +1091,10 @@ async function removeTrackingNumber(tracking_number: string): Promise<number | u
             // console.log(response_json);
             // console.log("registered the number successfully");
             return 0
+        } else if (prime_response.status == 536) {
+            // no relation record found to delete
+            console.log('no relation record found to delete');
+            return prime_response.status
         } else if (prime_response.ok) {
             if (currentView === 'details') {
                 // reinitialize and go back to main view
@@ -1107,7 +1117,7 @@ async function removeTrackingNumber(tracking_number: string): Promise<number | u
 
 /// Function for untracking a tracking number from in the user's options
 async function untrackNumber(tracking_number: string): Promise<number | undefined> {
-    // return 0 for OK, 1 for error
+    // return 0 for OK, 5XX for error
 
     // create the json to send as payload
     const prime_json_data = {
@@ -1144,6 +1154,10 @@ async function untrackNumber(tracking_number: string): Promise<number | undefine
             // console.log(response_json);
             // console.log("registered the number successfully");
             return 0
+        } else if (prime_response.status == 535) {
+            // package already set to unsubscribed
+            console.log('package already set to unsubscribed');
+            return prime_response.status
         } else if (prime_response.ok) {
             console.log('untracked number');
             // TODO: show a alert to the user
@@ -1151,7 +1165,8 @@ async function untrackNumber(tracking_number: string): Promise<number | undefine
             initApp();
             showTrackingDetails(tracking_number);
             return 0
-        } else if (!prime_response.ok) {
+        } 
+        else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
         } else {
             /* the more errors you get the smarter you are */
@@ -1165,7 +1180,7 @@ async function untrackNumber(tracking_number: string): Promise<number | undefine
 
 /// Function for retracking a untracked number from in the user's options
 async function retrackNumber(tracking_number: string): Promise<number | undefined> {
-    // return 0 for OK, 1 for error
+    // return 0 for OK, 5XX for errors
 
     // create the json to send as payload
     const prime_json_data = {
@@ -1202,6 +1217,14 @@ async function retrackNumber(tracking_number: string): Promise<number | undefine
             // console.log(response_json);
             // console.log("registered the number successfully");
             return 0
+        } else if (prime_response.status == 533) {
+            // package has been marked delivered so it can't be re-tracked
+            console.log('package has been marked delivered so it can\'t be re-tracked');
+            return prime_response.status
+        } else if (prime_response.status == 534) {
+            // package already set to subscribed
+            console.log('package already set to subscribed');
+            return prime_response.status
         } else if (prime_response.ok) {
             console.log('retracked number');
             // TODO: show a alert to the user
