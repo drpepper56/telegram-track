@@ -582,14 +582,14 @@ async function handleUntrackNumber(tracking_number: string) {
     if (removed_code == 0) {
         currentTrackingNumber = null;
         USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
-        tg.showAlert("Set to subscribed");
+        tg.showAlert("Set to unsubscribed");
         backToMainView();
         renderTrackingList();
         return;
     }
     if (removed_code == 535) {
-        // package has been marked delivered so it can't be re-tracked
-        tg.showAlert("Package has been marked delivered so it can't be re-tracked");
+        // already set to unsubscribed
+        tg.showAlert("Already set to unsubscribed");
         return;
     } else {
         throw new Error("Failed to remove tracking number");
