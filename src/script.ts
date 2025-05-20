@@ -813,12 +813,23 @@ function showAddTrackingDialog(): void {
                 console.log('found with no carrier')
                 closeModal();
                 return;
-            } else if (result === 1) {
+            } else if (result === 530) {
+                // Carrier not found, show carrier selection
                 console.log('not found with no carrier')
                 // Show carrier selection
                 carrierContainer.style.display = 'flex';
                 input.disabled = true;
                 setTimeout(() => carrierInput.focus(), 100);
+                return;
+            } else if (result === 540) {
+                // Tracking quota reached limit
+                tg.showAlert('Tracking quota reached limit');
+                closeModal();
+                return;
+            } else if (result === 541) {
+                // Relation record already exists
+                tg.showAlert('Tracking number already exists');
+                closeModal();
                 return;
             }
         } else {
@@ -871,6 +882,8 @@ function showAddTrackingDialog(): void {
             534 - already set to subscribed
             535 - already set to unsubscribed
             536 - no relation record found to delete
+            540 - tracking quota reached limit, sorry
+            541 - relation record already exists
 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
@@ -1044,9 +1057,9 @@ async function register_one_tracking_number(tracking_number: string, carrier?: n
             // console.log(response_json);
             // console.log("registered the number successfully");
             return 0
-        } else if (prime_response.status == 530) {
-            return 1
-        } else if (prime_response.ok) {
+        }  else if ((prime_response.status == 530) || (prime_response.status == 540) || (prime_response.status == 541)) {
+            return prime_response.status
+        }  else if (prime_response.ok) {
             console.log("registered the number successfully");
             return 0
         } else if (!prime_response.ok) {
