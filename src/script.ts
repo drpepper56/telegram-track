@@ -77,7 +77,7 @@ interface delivery_estimate {
 /// too big
 /// return a html element to display info from the @PackageData structure
 function createPackageElement(pkg: PackageData) {
-    const container = document.createElement('div');
+    let container = document.createElement('div');
     container.className = 'package-container';
 
     console.log('pkg.is_user_tracked', pkg.is_user_tracked);
@@ -88,13 +88,7 @@ function createPackageElement(pkg: PackageData) {
     
     const trackingNumber = document.createElement('h2');
     trackingNumber.textContent = `#${pkg.tracking_number}`;
-    
-    if (pkg.tag) {
-        const tag = document.createElement('span');
-        tag.className = 'package-tag';
-        tag.textContent = pkg.tag;
-        header.appendChild(tag);
-    }
+
     header.appendChild(trackingNumber);
     container.appendChild(header);
 
@@ -139,11 +133,13 @@ function createPackageElement(pkg: PackageData) {
     buttonContainer.style.gap = '10px';
     buttonContainer.style.marginTop = '10px';
 
+    console.log('pkg.is_user_tracked ', pkg.is_user_tracked)
+
     // Track/Untrack button - conditionally shown based on is_user_tracked
     if (pkg.is_user_tracked !== undefined) {
         if (pkg.is_user_tracked) {
             // Untrack button (yellow)
-            const untrackButton = document.createElement('button');
+            let untrackButton = document.createElement('button');
             untrackButton.textContent = 'Untrack';
             untrackButton.className = 'untrack-button';
             untrackButton.onclick = () => {
@@ -160,7 +156,7 @@ function createPackageElement(pkg: PackageData) {
             buttonContainer.appendChild(untrackButton);
         } else {
             // Track button (blue)
-            const trackButton = document.createElement('button');
+            let trackButton = document.createElement('button');
             trackButton.textContent = 'Track';
             trackButton.className = 'track-button';
             trackButton.onclick = () => {
@@ -200,7 +196,7 @@ function createPackageElement(pkg: PackageData) {
     buttonContainer.appendChild(removeButton);
 
     // Create a wrapper to separate the white content from buttons
-    const wrapper = document.createElement('div');
+    let wrapper = document.createElement('div');
     wrapper.appendChild(container);
     wrapper.appendChild(buttonContainer);
 
