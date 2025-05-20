@@ -463,9 +463,9 @@ function backToMainView(): void {
     console.log('before currentTrackingNumber', currentTrackingNumber)
 
     currentView = 'main';
+    currentTrackingNumber = null;
     mainView.style.display = 'block';
     detailsView.style.display = 'none';
-    currentTrackingNumber = null;
 
     console.log('after  currentTrackingNumber', currentTrackingNumber)
 
@@ -553,12 +553,16 @@ async function get_user_details() {
     return user_details;
 }
 
-/// function for handling remove number request
+/// function for handling retrack number request
 async function handleRetrackNumber(tracking_number: string) {
     const removed_code = await retrackNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
     if (removed_code == 0) {
-        currentTrackingNumber = null;
-        USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+        // modify the cashed USER_PACKAGES_DATA to change the is_user_tracked value
+        USER_PACKAGES_DATA = USER_PACKAGES_DATA.map(pkg => 
+            pkg.tracking_number === tracking_number 
+                ? {...pkg, is_user_tracked: true} 
+                : pkg
+        );
         tg.showAlert("Set to subscribed");
         backToMainView();
         renderTrackingList();
@@ -576,12 +580,16 @@ async function handleRetrackNumber(tracking_number: string) {
     }
 }
 
-/// function for handling remove number request
+/// function for handling untrack number request
 async function handleUntrackNumber(tracking_number: string) {
     const removed_code = await untrackNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
     if (removed_code == 0) {
-        currentTrackingNumber = null;
-        USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+        // modify the cashed USER_PACKAGES_DATA to change the is_user_tracked value
+        USER_PACKAGES_DATA = USER_PACKAGES_DATA.map(pkg => 
+            pkg.tracking_number === tracking_number 
+                ? {...pkg, is_user_tracked: false} 
+                : pkg
+        );
         tg.showAlert("Set to unsubscribed");
         backToMainView();
         renderTrackingList();
@@ -596,7 +604,7 @@ async function handleUntrackNumber(tracking_number: string) {
     }
 }
 
-/// function for handling untrack number request
+/// function for handling remove number request
 async function handleRemoveTrackingNumber(tracking_number: string) {
     const removed_code = await removeTrackingNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
     if (removed_code == 0) {
