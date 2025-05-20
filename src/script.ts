@@ -424,7 +424,7 @@ function renderTrackingList(): void {
 }
 
 // Show details for a tracking number
-async function showTrackingDetails(tracking_number: string): Promise<void> {
+function showTrackingDetails(tracking_number: string) {
     currentTrackingNumber = tracking_number;
 
     // state change
@@ -434,8 +434,8 @@ async function showTrackingDetails(tracking_number: string): Promise<void> {
     tg.BackButton.show();
     
     // Update header with tracking number
-    const detailsHeader = document.getElementById('details-header') as HTMLElement;
-    detailsHeader.textContent = `Tracking #${tracking_number}`;
+    // const detailsHeader = document.getElementById('details-header') as HTMLElement;
+    // detailsHeader.textContent = `Tracking #${tracking_number}`;
 
     const found = USER_PACKAGES_DATA.find(pkg => pkg.tracking_number === tracking_number);
     if (!found) {
