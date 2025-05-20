@@ -402,8 +402,9 @@ function renderTrackingList(): void {
         updateEmptyState();
         return;
     }
-    
+
     USER_PACKAGES_DATA.forEach(pkg => {
+        console.log('pkg.tracking_number ', pkg.tracking_number);
         const item = document.createElement('div');
         item.className = 'tracking-item';
         item.innerHTML = `
