@@ -457,14 +457,11 @@ function renderTrackingDetails(tracking_details: PackageData): void {
 
 /// Back to main view
 function backToMainView(): void {
-    console.log('before currentTrackingNumber', currentTrackingNumber)
-
     currentView = 'main';
     currentTrackingNumber = null;
     mainView.style.display = 'block';
     detailsView.style.display = 'none';
-
-    console.log('after  currentTrackingNumber', currentTrackingNumber)
+    renderTrackingList();
 
     // show back button and assign the back function to it
     tg.BackButton.hide();
@@ -561,7 +558,6 @@ async function handleRetrackNumber(tracking_number: string) {
                 : pkg
         );
         backToMainView();
-        renderTrackingList();
         tg.showAlert("Set to subscribed");
         return;
     } else if (response_code == 533) {
@@ -588,7 +584,6 @@ async function handleUntrackNumber(tracking_number: string) {
                 : pkg
         );
         backToMainView();
-        renderTrackingList();
         tg.showAlert("Set to unsubscribed");
         return;
     }
@@ -609,7 +604,6 @@ async function handleRemoveTrackingNumber(tracking_number: string) {
         currentTrackingNumber = null;
         USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
         backToMainView();
-        renderTrackingList();
         tg.showAlert("Number won't be tracked anymore");
         return;
     } else if (response_code == 536) {
