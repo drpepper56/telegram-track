@@ -555,23 +555,23 @@ async function get_user_details() {
 
 /// function for handling retrack number request
 async function handleRetrackNumber(tracking_number: string) {
-    const removed_code = await retrackNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
-    if (removed_code == 0) {
+    const response_code = await retrackNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
+    if (response_code == 0) {
         // modify the cashed USER_PACKAGES_DATA to change the is_user_tracked value
         USER_PACKAGES_DATA = USER_PACKAGES_DATA.map(pkg => 
             pkg.tracking_number === tracking_number 
                 ? {...pkg, is_user_tracked: true} 
                 : pkg
         );
-        tg.showAlert("Set to subscribed");
         backToMainView();
         renderTrackingList();
+        tg.showAlert("Set to subscribed");
         return;
-    } else if (removed_code == 533) {
+    } else if (response_code == 533) {
         // package has been marked delivered so it can't be re-tracked
         tg.showAlert("Package has been marked delivered so it can't be re-tracked");
         return;
-    } else if (removed_code == 534) {
+    } else if (response_code == 534) {
         // already set to subscribed
         tg.showAlert("Already set to subscribed");
         return;
@@ -582,20 +582,20 @@ async function handleRetrackNumber(tracking_number: string) {
 
 /// function for handling untrack number request
 async function handleUntrackNumber(tracking_number: string) {
-    const removed_code = await untrackNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
-    if (removed_code == 0) {
+    const response_code = await untrackNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
+    if (response_code == 0) {
         // modify the cashed USER_PACKAGES_DATA to change the is_user_tracked value
         USER_PACKAGES_DATA = USER_PACKAGES_DATA.map(pkg => 
             pkg.tracking_number === tracking_number 
                 ? {...pkg, is_user_tracked: false} 
                 : pkg
         );
-        tg.showAlert("Set to unsubscribed");
         backToMainView();
         renderTrackingList();
+        tg.showAlert("Set to unsubscribed");
         return;
     }
-    if (removed_code == 535) {
+    if (response_code == 535) {
         // already set to unsubscribed
         tg.showAlert("Already set to unsubscribed");
         return;
@@ -606,16 +606,16 @@ async function handleUntrackNumber(tracking_number: string) {
 
 /// function for handling remove number request
 async function handleRemoveTrackingNumber(tracking_number: string) {
-    const removed_code = await removeTrackingNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
-    if (removed_code == 0) {
+    const response_code = await removeTrackingNumber(tracking_number).then((code) => code!).catch((err) => console.log(err));
+    if (response_code == 0) {
         // untracked number for the user
         currentTrackingNumber = null;
         USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
-        tg.showAlert("Number won't be tracked anymore");
         backToMainView();
         renderTrackingList();
+        tg.showAlert("Number won't be tracked anymore");
         return;
-    } else if (removed_code == 536) {
+    } else if (response_code == 536) {
         // was already untracked
         tg.showAlert("Number was already untracked");
         return;
