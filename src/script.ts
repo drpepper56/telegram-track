@@ -404,7 +404,6 @@ function renderTrackingList(): void {
     }
 
     USER_PACKAGES_DATA.forEach(pkg => {
-        console.log('pkg.tracking_number ', pkg.tracking_number);
         const item = document.createElement('div');
         item.className = 'tracking-item';
         item.innerHTML = `
@@ -433,10 +432,6 @@ function showTrackingDetails(tracking_number: string) {
     detailsView.style.display = 'block';
     tg.BackButton.show();
     
-    // Update header with tracking number
-    // const detailsHeader = document.getElementById('details-header') as HTMLElement;
-    // detailsHeader.textContent = `Tracking #${tracking_number}`;
-
     const found = USER_PACKAGES_DATA.find(pkg => pkg.tracking_number === tracking_number);
     if (!found) {
         console.log("not found data to display")
