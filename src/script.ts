@@ -362,7 +362,7 @@ async function initApp() {
     const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
     currentTrackingNumber = null; // Reset tracking number
     USER_PACKAGES_DATA = trackingData; // Update global state
-    renderTrackingList(); // Pass data directly
+    renderTrackingList();
 }
 
 /*
@@ -1168,13 +1168,7 @@ async function removeTrackingNumber(tracking_number: string): Promise<number | u
             console.log('no relation record found to delete');
             return prime_response.status
         } else if (prime_response.ok) {
-            if (currentView === 'details') {
-                // reinitialize and go back to main view
-                // TODO: show a alert to the user
-                initApp();
-                backToMainView();
-                return 0
-            }
+            return 0
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
         } else {
@@ -1231,11 +1225,6 @@ async function untrackNumber(tracking_number: string): Promise<number | undefine
             console.log('package already set to unsubscribed');
             return prime_response.status
         } else if (prime_response.ok) {
-            console.log('untracked number');
-            // TODO: show a alert to the user
-            // reinitialize and open tracking details view again
-            initApp();
-            showTrackingDetails(tracking_number);
             return 0
         } 
         else if (!prime_response.ok) {
@@ -1299,10 +1288,6 @@ async function retrackNumber(tracking_number: string): Promise<number | undefine
             return prime_response.status
         } else if (prime_response.ok) {
             console.log('retracked number');
-            // TODO: show a alert to the user
-            // reinitialize and open tracking details view again
-            initApp();
-            showTrackingDetails(tracking_number);
             return 0
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
