@@ -86,7 +86,6 @@ async function initApp() {
             let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
             // set the name tag to the package
             if (name_tag !== undefined) {
-                const user_details = await get_user_details();
                 const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
                 USER_PACKAGES_NAME_TAGS.set(key, name_tag);
             }
@@ -185,9 +184,7 @@ function createPackageElement(pkg: PackageData) {
     nameTag.style.cssText = name_tag ? `color: black;` : `color: #007AFF`; // change color if name tag is not set
 
     // Add click handler to enable editing the name tag
-    nameTag.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        
+    nameTag.addEventListener('click', () => {        
         // Current name tag value
         const currentValue = name_tag ? name_tag : "";
         
@@ -246,11 +243,12 @@ function createPackageElement(pkg: PackageData) {
             padding: 6px 12px;
             border-radius: 4px;
         `;
-        saveButtonNameTag.onclick = () => {
+        saveButtonNameTag.onclick = async () => {
             const newName = inputNameTag.value.trim();
             if (newName) {
                 nameTag.textContent = newName;
-                set_tracking_number_name_tag(pkg.tracking_number, newName);
+                nameTag.style.cssText = newName ? `color: black;` : `color: #007AFF`; // change color if name tag is set
+                await set_tracking_number_name_tag(pkg.tracking_number, newName);
             }
             document.body.removeChild(modalNameTag);
         };
@@ -606,13 +604,12 @@ async function backToMainViewFromNotification(): Promise<void> {
     currentTrackingNumber = null; // Reset tracking number
     USER_PACKAGES_DATA = trackingData; // Update global state
     // set the name tags for the packages
-    USER_PACKAGES_DATA.forEach(async pkg =>  {
+    USER_PACKAGES_DATA.forEach(async pkg => {
         // get name tag from telegram storage
         let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
         // set the name tag to the package
         if (name_tag !== undefined) {
-            const user_details = await get_user_details();
-            const key = `${user_details.user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
+            const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
             USER_PACKAGES_NAME_TAGS.set(key, name_tag);
         }
     });
@@ -835,8 +832,7 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
 
 /// function to store the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} in the telegram cloud storage
 async function set_tracking_number_name_tag(tracking_number: string, name_tag: string): Promise<boolean> {
-    const user_details = await get_user_details();
-    const key = `${user_details.user_id_hash}_${tracking_number}`;
+    const key = `${user_id_hash}_${tracking_number}`;
     console.log('key', key);
 
     // set locally
@@ -858,15 +854,15 @@ async function set_tracking_number_name_tag(tracking_number: string, name_tag: s
 
 /// function to get the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} from the telegram cloud storage
 async function get_tracking_number_name_tag(tracking_number: string): Promise<string | undefined> {
-    const user_details = await get_user_details();
-    const key = `${user_details.user_id_hash}_${tracking_number}`;
-    console.log('key', key);
+    const key = `${user_id_hash}_${tracking_number}`;
+    // console.log('key', key);
 
     tg.CloudStorage.getItem(key, (error, value) => {
         if (error) {
             console.error("Storage error:", error);
             return undefined;
         } else {
+            console.log('name tag for', tracking_number,  value)
             return value; 
         }
       });
