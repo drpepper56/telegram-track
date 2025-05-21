@@ -337,8 +337,6 @@ let NOTIFICATION_DATA: PackageData | undefined;
 
     Init TWA
 
-    TODO: if all data gets called is up to notification handler and the init function to figure out later
-
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
@@ -515,16 +513,20 @@ async function notification_handler(): Promise<boolean> {
         console.log(decodedData.package_update);
 
         // request the tracking data
-        let response_json = await get_tracking_data(decodedData.package_update).then((data) => data!).catch((err) => console.log(err));
+        let response = await get_tracking_data(decodedData.package_update).then((data) => data!).catch((err) => console.log(err));
 
-        if (response_json === 525) {
+        if (response === undefined) {
+            // didn't get anything
+            return false;
+        }
+        if (response === 525) {
             // no relation record found
             tg.showAlert("The tracking number from the notification has been removed or was never registered");
             return false;
         }
 
         // ts
-        NOTIFICATION_DATA = response_json! as unknown as PackageData;
+        NOTIFICATION_DATA = response! as unknown as PackageData;
         return true;
 
         // notify(decodedData.package_update);
@@ -541,7 +543,7 @@ async function notification_handler(): Promise<boolean> {
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
-/// hash function for putting userID hash in every request header //TODO: put everywhere
+/// hash function for putting userID hash in every request header
 async function get_user_id_hash() {
     if (!window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
         throw new Error("Telegram user data not available");
@@ -584,6 +586,10 @@ async function handleRetrackNumber(tracking_number: string) {
         backToMainView();
         tg.showAlert("Set to subscribed");
         return;
+    } else if (response_code == 525) {
+        // user doesn't have access to that number, no relation record found
+        tg.showAlert("Number not registered");
+        return;
     } else if (response_code == 533) {
         // package has been marked delivered so it can't be re-tracked
         tg.showAlert("Package has been marked delivered so it can't be re-tracked");
@@ -609,6 +615,10 @@ async function handleUntrackNumber(tracking_number: string) {
         );
         backToMainView();
         tg.showAlert("Set to unsubscribed");
+        return;
+    } else if (response_code == 525) {
+        // user doesn't have access to that number, no relation record found
+        tg.showAlert("Number not registered");
         return;
     }
     if (response_code == 535) {
@@ -905,7 +915,7 @@ function showAddTrackingDialog(): void {
     list of custom 5XX codes:
             520 - user doesn't exist yet, client should send request to create user
     TODO:   521 - user already exists, handle error
-    TODO:   525 - user doesn't have access to that number, no relation record found
+            525 - user doesn't have access to that number, no relation record found
             530 - carrier not found, client should send a register number request that includes a carrier
             533 - package has been marked delivered so it can't be re-tracked
             534 - already set to subscribed
@@ -1254,9 +1264,7 @@ async function untrackNumber(tracking_number: string): Promise<number | undefine
             // console.log(response_json);
             // console.log("registered the number successfully");
             return 0
-        } else if (prime_response.status == 535) {
-            // package already set to unsubscribed
-            console.log('package already set to unsubscribed');
+        } else if ((prime_response.status == 535) || (prime_response.status == 525)) {
             return prime_response.status
         } else if (prime_response.ok) {
             return 0
@@ -1312,14 +1320,8 @@ async function retrackNumber(tracking_number: string): Promise<number | undefine
             // console.log(response_json);
             // console.log("registered the number successfully");
             return 0
-        } else if (prime_response.status == 533) {
-            // package has been marked delivered so it can't be re-tracked
-            console.log('package has been marked delivered so it can\'t be re-tracked');
-            return prime_response.status
-        } else if (prime_response.status == 534) {
-            // package already set to subscribed
-            console.log('package already set to subscribed');
-            return prime_response.status
+        } else if ((prime_response.status == 533) || (prime_response.status == 534) || (prime_response.status == 525)) {
+            return prime_response.status;
         } else if (prime_response.ok) {
             console.log('retracked number');
             return 0
@@ -1333,21 +1335,6 @@ async function retrackNumber(tracking_number: string): Promise<number | undefine
         /* the more errors you get the smarter you are */   
         throw error;
     }; 
-}
-
-/// this shouldn't even be here
-/// show the stuff from the notification in the dom
-function notify(payload: JSON) {  
-    // let update_package_objetto;
-    console.log("the thing: " + payload);
-    // try {
-    //     update_package_objetto = JSON.parse(payload);
-    // } catch (e) {
-    //     console.log('porco dio javascripto', e);
-    //     throw e;
-    // }  
-    console.log(JSON.stringify(payload, null, 2));
-    document.getElementById("update-box")!.innerText = JSON.stringify(payload, null, 2);
 }
 
 /*
