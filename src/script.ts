@@ -9,6 +9,93 @@
 
 */
 
+/*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+    CONSTANTS
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+*/
+
+const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
+// const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
+// const BACKEND_LINK = 'http://127.0.0.1:8080';
+/// import the csv carrier list as array from carriers.ts 
+import {getKeyNameList} from './carriers.js';
+
+/*      STATE HANDLING      */
+
+let currentView: 'main' | 'details' | 'notification_details' = 'main';
+let currentTrackingNumber: string | null = null;
+// set telegram window object
+const tg = window.Telegram.WebApp;
+let user_id_hash: string = ""; // hash of the user id
+let USER_PACKAGES_DATA: PackageData[] = [];
+let NOTIFICATION_DATA: PackageData | undefined;
+const USER_PACKAGES_NAME_TAGS = new Map<string, string>(); // Store name tags for tracking numbers
+
+
+/*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+    Init TWA
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+*/
+
+
+// Initialize the app
+async function initApp() {
+
+    // show main button and assign the add tracking function to it
+    tg.MainButton.setText('ADD TRACKING NUMBER');
+    tg.MainButton.onClick(showAddTrackingDialog);
+    tg.MainButton.show();
+
+    const user_details = await get_user_details();
+    user_id_hash = user_details.user_id_hash;
+
+    const notification_present = await notification_handler();
+    if (notification_present) {
+        // Back button handling
+        tg.BackButton.onClick(backToMainViewFromNotification);
+        // set structure for the notification data
+        USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
+
+        // get name tag from telegram storage
+        let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
+        // set the name tag to the package
+        if (name_tag !== undefined) {
+            const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
+            USER_PACKAGES_NAME_TAGS.set(key, name_tag);
+        }
+        // show details of notification
+        showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
+    } else {
+        // Back button handling
+        tg.BackButton.onClick(backToMainView);
+
+        // Load data and pass directly to render function
+        const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+        currentTrackingNumber = null; // Reset tracking number
+        USER_PACKAGES_DATA = trackingData; // Update global state
+
+        // set the name tags for the packages
+        USER_PACKAGES_DATA.forEach(async pkg =>  {
+            // get name tag from telegram storage
+            let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
+            // set the name tag to the package
+            if (name_tag !== undefined) {
+                const user_details = await get_user_details();
+                const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
+                USER_PACKAGES_NAME_TAGS.set(key, name_tag);
+            }
+        });
+
+        renderTrackingList();
+    }
+}
+
 
 /* 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -96,24 +183,93 @@ function createPackageElement(pkg: PackageData) {
     nameTag.className = 'package-name-tag';
     nameTag.textContent = name_tag ?? "set name tag"; // default if undefined
 
-    // Add click handler to enable editing
-    nameTag.addEventListener('click', () => {
-        const newName = prompt("Edit name tag:", nameTag.textContent ?? "");
-        if (newName !== null) {
-            nameTag.textContent = newName;
-            
-            // Update the Map with the new value
-            USER_PACKAGES_NAME_TAGS.set(`${user_id_hash}_${pkg.tracking_number}`, newName);
-            // Save to localStorage or backend
-            set_tracking_number_name_tag(pkg.tracking_number, newName)
-        }
+    // Add click handler to enable editing the name tag
+    nameTag.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        
+        // Current name tag value
+        const currentValue = name_tag ? name_tag : "";
+        
+        // Fallback: Create and show a custom modal
+        const modalNameTag = document.createElement('div');
+        modalNameTag.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        `;
+        
+        const modalContentNameTag = document.createElement('div');
+        modalContentNameTag.style.cssText = `
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 300px;
+        `;
+        
+        const inputNameTag = document.createElement('input');
+        inputNameTag.type = 'text';
+        inputNameTag.value = currentValue;
+        inputNameTag.placeholder = "Enter name tag";
+        inputNameTag.style.cssText = `
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        `;
+        
+        const buttonContainerNameTag = document.createElement('div');
+        buttonContainerNameTag.style.cssText = `
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        `;
+        
+        const cancelButtonNameTag = document.createElement('button');
+        cancelButtonNameTag.textContent = 'Cancel';
+        cancelButtonNameTag.onclick = () => document.body.removeChild(modalNameTag);
+        
+        const saveButtonNameTag = document.createElement('button');
+        saveButtonNameTag.textContent = 'Save';
+        saveButtonNameTag.style.cssText = `
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+        `;
+        saveButtonNameTag.onclick = () => {
+            const newName = inputNameTag.value.trim();
+            if (newName) {
+                nameTag.textContent = newName;
+                set_tracking_number_name_tag(pkg.tracking_number, newName);
+            }
+            document.body.removeChild(modalNameTag);
+        };
+        
+        // Build modal
+        buttonContainerNameTag.append(cancelButtonNameTag, saveButtonNameTag);
+        modalContentNameTag.append(inputNameTag, buttonContainerNameTag);
+        modalNameTag.appendChild(modalContentNameTag);
+        document.body.appendChild(modalNameTag);
+        
+        // Focus input and handle Enter key
+        inputNameTag.focus();
+        inputNameTag.onkeydown = (e) => {
+            if (e.key === 'Enter') saveButtonNameTag.click();
+        };
     });
 
     // make it appear a popup when clicked that has a input field to change the name tag
-    header.appendChild(nameTag);
-    
-
     header.appendChild(trackingNumber);
+    header.appendChild(nameTag);
     container.appendChild(header);
 
     // Latest event section
@@ -332,93 +488,7 @@ function formatEventTime(time: time_raw): string {
     return time.date || time.time || '';
 }
 
-/*
--_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
-    CONSTANTS
-
--_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
-*/
-
-const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
-import { get } from 'http';
-// const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
-// const BACKEND_LINK = 'http://127.0.0.1:8080';
-/// import the csv carrier list as array from carriers.ts 
-import {getKeyNameList} from './carriers.js';
-
-/*      STATE HANDLING      */
-
-let currentView: 'main' | 'details' | 'notification_details' = 'main';
-let currentTrackingNumber: string | null = null;
-// set telegram window object
-const tg = window.Telegram.WebApp;
-let user_id_hash: string = ""; // hash of the user id
-let USER_PACKAGES_DATA: PackageData[] = [];
-let NOTIFICATION_DATA: PackageData | undefined;
-const USER_PACKAGES_NAME_TAGS = new Map<string, string>(); // Store name tags for tracking numbers
-
-
-/*
--_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
-
-    Init TWA
-
--_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
-*/
-
-
-// Initialize the app
-async function initApp() {
-
-    // show main button and assign the add tracking function to it
-    tg.MainButton.setText('ADD TRACKING NUMBER');
-    tg.MainButton.onClick(showAddTrackingDialog);
-    tg.MainButton.show();
-
-    const user_details = await get_user_details();
-    user_id_hash = user_details.user_id_hash;
-
-    const notification_present = await notification_handler();
-    if (notification_present) {
-        // Back button handling
-        tg.BackButton.onClick(backToMainViewFromNotification);
-        // set structure for the notification data
-        USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
-
-        // get name tag from telegram storage
-        let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
-        // set the name tag to the package
-        if (name_tag !== undefined) {
-            const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
-            USER_PACKAGES_NAME_TAGS.set(key, name_tag);
-        }
-        // show details of notification
-        showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
-    } else {
-        // Back button handling
-        tg.BackButton.onClick(backToMainView);
-
-        // Load data and pass directly to render function
-        const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
-        currentTrackingNumber = null; // Reset tracking number
-        USER_PACKAGES_DATA = trackingData; // Update global state
-
-        // set the name tags for the packages
-        USER_PACKAGES_DATA.forEach(async pkg =>  {
-            // get name tag from telegram storage
-            let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
-            // set the name tag to the package
-            if (name_tag !== undefined) {
-                const user_details = await get_user_details();
-                const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
-                USER_PACKAGES_NAME_TAGS.set(key, name_tag);
-            }
-        });
-
-        renderTrackingList();
-    }
-}
 
 /*
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -768,6 +838,10 @@ async function set_tracking_number_name_tag(tracking_number: string, name_tag: s
     const key = `${user_details.user_id_hash}_${tracking_number}`;
     console.log('key', key);
 
+    // set locally
+    USER_PACKAGES_NAME_TAGS.set(key, name_tag); 
+
+    // save in cloud storage
     tg.CloudStorage.setItem(key, name_tag, (error, success) => {
         if (error) {
             console.error("Storage error:", error);
