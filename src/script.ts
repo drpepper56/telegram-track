@@ -63,7 +63,7 @@ async function initApp() {
         USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
 
         // get name tag from telegram storage
-        get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
+        await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
         const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
         let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
         console.log('name_tag in init notification', name_tag)
@@ -80,14 +80,12 @@ async function initApp() {
         USER_PACKAGES_DATA = trackingData; // Update global state
 
         // set the name tags for the packages
-        USER_PACKAGES_DATA.forEach(async pkg =>  {
+        USER_PACKAGES_DATA.forEach(async pkg => {
             // get name tag from telegram storage
-            let name_tag = await get_tracking_number_name_tag(pkg.tracking_number);
-            // set the name tag to the package
-            if (name_tag !== undefined) {
-                const key = `${user_id_hash}_${pkg.tracking_number}`;
-                USER_PACKAGES_NAME_TAGS.set(key, name_tag);
-            }
+            await get_tracking_number_name_tag(pkg.tracking_number);
+            const key = `${user_id_hash}_${pkg.tracking_number}`;
+            let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
+            console.log('name_tag in init notification', name_tag)
         });
 
         renderTrackingList();
