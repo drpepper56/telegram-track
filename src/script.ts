@@ -623,6 +623,7 @@ async function backToMainViewFromNotification(): Promise<void> {
     renderTrackingList();
 
     // Back button handling
+    tg.BackButton.offClick(backToMainViewFromNotification);
     tg.BackButton.onClick(backToMainView);
 
     // hide back button for main page
