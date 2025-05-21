@@ -356,23 +356,19 @@ async function initApp() {
     if (notification_present) {
         // Back button handling
         tg.BackButton.onClick(backToMainViewFromNotification);
-
         // set structure for the notification data
         USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
-
         // show details of notification
         showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
     } else {
         // Back button handling
         tg.BackButton.onClick(backToMainView);
 
-        
         // Load data and pass directly to render function
         const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
         currentTrackingNumber = null; // Reset tracking number
         USER_PACKAGES_DATA = trackingData; // Update global state
         renderTrackingList();
-
     }
 }
 
@@ -479,17 +475,19 @@ async function backToMainViewFromNotification(): Promise<void> {
     currentTrackingNumber = null;
     mainView.style.display = 'block';
     detailsView.style.display = 'none';
-    renderTrackingList();
 
     // finish the init function
     const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
     currentTrackingNumber = null; // Reset tracking number
     USER_PACKAGES_DATA = trackingData; // Update global state
 
+    // render the list after loading the data
+    renderTrackingList();
+
     // Back button handling
     tg.BackButton.onClick(backToMainView);
 
-    // show back button and assign the back function to it
+    // hide back button for main page
     tg.BackButton.hide();
 }
 
