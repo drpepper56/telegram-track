@@ -352,17 +352,28 @@ async function initApp() {
     tg.MainButton.show();
 
 
-    // const notification_present = await notification_handler();
-    // if (notification_present) {
-        // // open tracking details page with notification package details
-    //      return;
-    // }
-    
-    // Load data and pass directly to render function
-    const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
-    currentTrackingNumber = null; // Reset tracking number
-    USER_PACKAGES_DATA = trackingData; // Update global state
-    renderTrackingList();
+    const notification_present = await notification_handler();
+    if (notification_present) {
+        // Back button handling
+        tg.BackButton.onClick(backToMainViewFromNotification);
+
+        // set structure for the notification data
+        USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
+
+        // show details of notification
+        showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
+    } else {
+        // Back button handling
+        tg.BackButton.onClick(backToMainView);
+
+        
+        // Load data and pass directly to render function
+        const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+        currentTrackingNumber = null; // Reset tracking number
+        USER_PACKAGES_DATA = trackingData; // Update global state
+        renderTrackingList();
+
+    }
 }
 
 /*
@@ -450,7 +461,7 @@ function renderTrackingDetails(tracking_details: PackageData): void {
     detailsView.appendChild(trackingDetailsElement);
 }
 
-/// Back to main view
+/// Back button handling to main view
 function backToMainView(): void {
     currentView = 'main';
     currentTrackingNumber = null;
@@ -462,8 +473,25 @@ function backToMainView(): void {
     tg.BackButton.hide();
 }
 
-// Back button handling
-tg.BackButton.onClick(backToMainView);
+// Back button handling for notification view
+async function backToMainViewFromNotification(): Promise<void> {
+    currentView = 'main';
+    currentTrackingNumber = null;
+    mainView.style.display = 'block';
+    detailsView.style.display = 'none';
+    renderTrackingList();
+
+    // finish the init function
+    const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+    currentTrackingNumber = null; // Reset tracking number
+    USER_PACKAGES_DATA = trackingData; // Update global state
+
+    // Back button handling
+    tg.BackButton.onClick(backToMainView);
+
+    // show back button and assign the back function to it
+    tg.BackButton.hide();
+}
 
 /*
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -479,7 +507,7 @@ async function notification_handler(): Promise<boolean> {
     console.log('startParam', startParam)
     // try to get param
     try {
-        // json -> base64 -> json decoding pogchamp
+        // json -> base64 -> json decoding
         const urlParams = new URLSearchParams(startParam);
         const encodedParam = urlParams.get('tgWebAppStartParam'); 
         const urlDecoded = decodeURIComponent(encodedParam!);
@@ -491,11 +519,14 @@ async function notification_handler(): Promise<boolean> {
         // request the tracking data
         let response_json = await get_tracking_data(decodedData.package_update).then((data) => data!).catch((err) => console.log(err));
 
+        if (response_json === 525) {
+            // no relation record found
+            tg.showAlert("The tracking number from the notification has been removed or was never registered");
+            return false;
+        }
+
         // ts
         NOTIFICATION_DATA = response_json! as unknown as PackageData;
-        renderTrackingDetails(NOTIFICATION_DATA);
-        // temp function
-        // notify(response_json!);
         return true;
 
         // notify(decodedData.package_update);
@@ -966,7 +997,7 @@ async function create_user_request_no_body(headers: any, prime_path: string): Pr
 
 /// Function for sending a request for tracking data of a number, assume it's already registered
 /// and the user has permissions to it, call after a notification or when accessing the tracking page
-async function get_tracking_data(tracking_number: string): Promise<JSON | undefined> {
+async function get_tracking_data(tracking_number: string): Promise<JSON | number | undefined> {
     // create the json to send as payload
     const prime_json_data = {
         "number": tracking_number
@@ -1003,6 +1034,8 @@ async function get_tracking_data(tracking_number: string): Promise<JSON | undefi
         } else if (prime_response.ok) {
             console.log(success_mes)
             return await prime_response.json();
+        } else if (prime_response.status == 525) {
+            return await prime_response.status;
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.text());
             return;
