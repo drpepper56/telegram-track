@@ -600,6 +600,8 @@ function backToMainView(): void {
 
 // Back button handling for notification view
 async function backToMainViewFromNotification(): Promise<void> {
+    console.log('what are you doing here again')
+
     currentView = 'main';
     currentTrackingNumber = null;
     mainView.style.display = 'block';
