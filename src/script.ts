@@ -63,7 +63,8 @@ async function initApp() {
         USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
 
         // get name tag from telegram storage
-        let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
+        let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number).then((data) => data!).catch((err) => {throw new Error(err)});
+        console.log('name_tag in init notification', name_tag)
         // set the name tag to the package
         if (name_tag !== undefined) {
             const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
