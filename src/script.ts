@@ -837,7 +837,7 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
 async function set_tracking_number_name_tag(tracking_number: string, name_tag: string) {
     const key = `${user_id_hash}_${tracking_number}`;
     // save in cloud storage
-    tg.CloudStorage.setItem(key, name_tag, (error, result) => {
+    await tg.CloudStorage.setItem(key, name_tag, (error, result) => {
         if (error) {
             // didn't store :'(
             console.error("Storage error:", error);
@@ -847,13 +847,13 @@ async function set_tracking_number_name_tag(tracking_number: string, name_tag: s
         } else {
             console.log('what?')
         }
-      });
+    });
 }
 
 /// function to get the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} from the telegram cloud storage
 async function get_tracking_number_name_tag(tracking_number: string){
     const key = `${user_id_hash}_${tracking_number}`;
-    tg.CloudStorage.getItem(key, async (error, value) => {
+    await tg.CloudStorage.getItem(key,  (error, value) => {
         if (error) {
             console.error("Storage error:", error);
         } else if (value !== null) {
@@ -862,7 +862,7 @@ async function get_tracking_number_name_tag(tracking_number: string){
         } else {
             console.log('no value found', value);
         }
-      })
+    })
 }
 
 /*
