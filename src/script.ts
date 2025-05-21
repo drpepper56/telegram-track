@@ -856,8 +856,11 @@ async function get_tracking_number_name_tag(tracking_number: string){
     tg.CloudStorage.getItem(key, async (error, value) => {
         if (error) {
             console.error("Storage error:", error);
-        } else {
+        } else if (value !== null) {
+            console.log('found value', value);
             USER_PACKAGES_NAME_TAGS.set(key, value!);
+        } else {
+            console.log('no value found', value);
         }
       })
 }
