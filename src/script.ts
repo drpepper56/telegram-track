@@ -63,13 +63,13 @@ async function initApp() {
         USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
 
         // get name tag from telegram storage
-        let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number).then((data) => data!).catch((err) => {throw new Error(err)});
+        let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
         console.log('name_tag in init notification', name_tag)
         // set the name tag to the package
         if (name_tag !== undefined) {
             const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
-            console.log('setting name tags before notification display', key, name_tag)
-            USER_PACKAGES_NAME_TAGS.set(key, name_tag);
+            console.log('setting name tags before notification display', key, name_tag!)
+            USER_PACKAGES_NAME_TAGS.set(key, name_tag!);
         }
         // show details of notification
         showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
@@ -85,10 +85,10 @@ async function initApp() {
         // set the name tags for the packages
         USER_PACKAGES_DATA.forEach(async pkg =>  {
             // get name tag from telegram storage
-            let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
+            let name_tag = await get_tracking_number_name_tag(pkg.tracking_number);
             // set the name tag to the package
             if (name_tag !== undefined) {
-                const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
+                const key = `${user_id_hash}_${pkg.tracking_number}`;
                 USER_PACKAGES_NAME_TAGS.set(key, name_tag);
             }
         });
@@ -610,10 +610,10 @@ async function backToMainViewFromNotification(): Promise<void> {
     // set the name tags for the packages
     USER_PACKAGES_DATA.forEach(async pkg => {
         // get name tag from telegram storage
-        let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
+        let name_tag = await get_tracking_number_name_tag(pkg.tracking_number);
         // set the name tag to the package
         if (name_tag !== undefined) {
-            const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
+            const key = `${user_id_hash}_${pkg.tracking_number}`;
             USER_PACKAGES_NAME_TAGS.set(key, name_tag);
         }
     });
