@@ -63,14 +63,11 @@ async function initApp() {
         USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
 
         // get name tag from telegram storage
-        let name_tag = await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
+        get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
+        const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
+        let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
         console.log('name_tag in init notification', name_tag)
-        // set the name tag to the package
-        if (name_tag !== undefined) {
-            const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
-            console.log('setting name tags before notification display', key, name_tag!)
-            USER_PACKAGES_NAME_TAGS.set(key, name_tag!);
-        }
+    
         // show details of notification
         showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
     } else {
@@ -808,7 +805,7 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
         tg.showAlert('Tracking number registered!');
         // store the tracking number with a tag
         if (name_tag !== undefined && name_tag.length > 0) {
-            set_tracking_number_name_tag(tracking_number, name_tag);
+            await set_tracking_number_name_tag(tracking_number, name_tag);
         }
         return 0;
     } else if (result === 541) {
@@ -863,7 +860,6 @@ async function get_tracking_number_name_tag(tracking_number: string){
             USER_PACKAGES_NAME_TAGS.set(key, value!);
         }
       })
-    console.log('why are you here')
 }
 
 /*
