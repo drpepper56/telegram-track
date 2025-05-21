@@ -57,6 +57,8 @@ async function initApp() {
 
     const notification_present = await notification_handler();
     if (notification_present) {
+        // start from notification
+
         // Back button handling
         tg.BackButton.onClick(backToMainViewFromNotification);
         // set structure for the notification data
@@ -64,13 +66,12 @@ async function initApp() {
 
         // get name tag from telegram storage
         await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number)
-        const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
-        let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
-        console.log('name_tag in notification', name_tag)
     
         // show details of notification
         showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
     } else {
+        // start normally
+
         // Back button handling
         tg.BackButton.onClick(backToMainView);
 
@@ -79,14 +80,8 @@ async function initApp() {
         currentTrackingNumber = null; // Reset tracking number
         USER_PACKAGES_DATA = trackingData; // Update global state
 
-        // set the name tags for the packages
-        USER_PACKAGES_DATA.forEach(async pkg => {
-            // get name tag from telegram storage
-            await get_tracking_number_name_tag(pkg.tracking_number)
-            const key = `${user_id_hash}_${pkg.tracking_number}`;
-            let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
-            console.log('name_tag in init', name_tag)
-        });
+        // get the name tags for the packages
+        await get_tracking_number_name_tags(USER_PACKAGES_DATA.map(pkg => pkg.tracking_number));
 
         renderTrackingList();
     }
@@ -863,6 +858,31 @@ async function get_tracking_number_name_tag(tracking_number: string): Promise<bo
                 resolve(false);
             } else if (value !== null) {
                 USER_PACKAGES_NAME_TAGS.set(key, value!);
+                resolve(true); 
+            } else {
+                resolve(false);
+            }
+        })
+    })
+}
+
+/// function for getting multiple {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} 
+/// from the telegram cloud storage
+async function get_tracking_number_name_tags(tracking_numbers: string[]): Promise<boolean> {
+    // make a key for each tracking number
+    const keys = tracking_numbers.map(tracking_number => `${user_id_hash}_${tracking_number}`);
+
+    // get items from cloud storage
+    return new Promise<boolean>((resolve) => {
+        tg.CloudStorage.getItems(keys, (error, values) => {
+            if (error) {
+                resolve(false);
+            } else if (values !== null) {
+                // set the name tags in the local storage
+                console.log('values from multiple key query', values)
+                for (const key in values) {
+                    USER_PACKAGES_NAME_TAGS.set(key, values[key]);
+                }
                 resolve(true); 
             } else {
                 resolve(false);
