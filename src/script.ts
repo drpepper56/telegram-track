@@ -161,20 +161,23 @@ function createPackageElement(pkg: PackageData) {
     // Header with tracking number and tag
     const header = document.createElement('div');
     header.className = 'package-header';
+    header.style.display = 'flex';
+    header.style.flexDirection = 'column'; // Stack children vertically
+    header.style.gap = '4px'; // Add some space between elements
     
     // package tracking number
     const trackingNumber = document.createElement('h2');
     trackingNumber.textContent = `#${pkg.tracking_number}`;
 
-    // Assuming USER_PACKAGES_NAME_TAGS is a Map<string, string>
+    // get package name tag from local storage
     const key = `${user_id_hash}_${pkg.tracking_number}`
     let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
-    console.log('tag got from local in display data', key, name_tag)
 
     // Create the name tag element
     const nameTag = document.createElement('h3');
     nameTag.className = 'package-name-tag';
     nameTag.textContent = name_tag ? name_tag : "set name tag"; // default if undefined
+    nameTag.style.cursor = 'pointer';
     nameTag.style.cssText = name_tag ? `color: black;` : `color: #007AFF`; // change color if name tag is not set
 
     // Add click handler to enable editing the name tag
@@ -182,82 +185,99 @@ function createPackageElement(pkg: PackageData) {
         // Current name tag value
         const currentValue = name_tag ? name_tag : "";
         
-        // Fallback: Create and show a custom modal
-        const modalNameTag = document.createElement('div');
-        modalNameTag.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        `;
+        // Create modal container
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.right = '0';
+        modal.style.bottom = '0';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '1000';
         
-        const modalContentNameTag = document.createElement('div');
-        modalContentNameTag.style.cssText = `
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 300px;
-        `;
+        // Create popup container
+        const popupContainer = document.createElement('div');
+        popupContainer.style.padding = '16px';
+        popupContainer.style.display = 'flex';
+        popupContainer.style.flexDirection = 'column';
+        popupContainer.style.gap = '12px';
+        popupContainer.style.width = '100%';
+        popupContainer.style.maxWidth = '300px';
+        popupContainer.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
+        popupContainer.style.borderRadius = '12px';
         
-        const inputNameTag = document.createElement('input');
-        inputNameTag.type = 'text';
-        inputNameTag.value = currentValue;
-        inputNameTag.placeholder = "Enter name tag";
-        inputNameTag.style.cssText = `
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-        `;
+        // Create title
+        const title = document.createElement('div');
+        title.textContent = 'Edit Name Tag';
+        title.style.fontWeight = 'bold';
+        title.style.fontSize = '16px';
         
-        const buttonContainerNameTag = document.createElement('div');
-        buttonContainerNameTag.style.cssText = `
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        `;
+        // Create input field
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentValue;
+        input.placeholder = 'Enter name tag';
+        input.style.padding = '10px';
+        input.style.borderRadius = '8px';
+        input.style.border = '1px solid var(--tg-theme-hint-color, #707579)';
+        input.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
+        input.style.color = 'var(--tg-theme-text-color, #000000)';
         
-        const cancelButtonNameTag = document.createElement('button');
-        cancelButtonNameTag.textContent = 'Cancel';
-        cancelButtonNameTag.onclick = () => document.body.removeChild(modalNameTag);
+        // Create button container
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'flex-end';
+        buttonContainer.style.gap = '8px';
         
-        const saveButtonNameTag = document.createElement('button');
-        saveButtonNameTag.textContent = 'Save';
-        saveButtonNameTag.style.cssText = `
-            background: #007AFF;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-        `;
-        saveButtonNameTag.onclick = async () => {
-            const newName = inputNameTag.value.trim();
+        // Create cancel button
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.style.padding = '8px 12px';
+        cancelButton.style.borderRadius = '8px';
+        cancelButton.style.border = 'none';
+        cancelButton.style.background = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
+        cancelButton.style.color = 'var(--tg-theme-text-color, #000000)';
+        cancelButton.onclick = () => document.body.removeChild(modal);
+        
+        // Create save button
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Save';
+        saveButton.style.padding = '8px 12px';
+        saveButton.style.borderRadius = '8px';
+        saveButton.style.border = 'none';
+        saveButton.style.background = 'var(--tg-theme-button-color, #2481cc)';
+        saveButton.style.color = 'var(--tg-theme-button-text-color, #ffffff)';
+        saveButton.onclick = async () => {
+            const newName = input.value.trim();
             if (newName) {
                 nameTag.textContent = newName;
-                nameTag.style.cssText = newName ? `color: black;` : `color: #007AFF`; // change color if name tag is set
+                nameTag.style.color = 'var(--tg-theme-text-color, #000000)';
                 await set_tracking_number_name_tag(pkg.tracking_number, newName);
             }
-            document.body.removeChild(modalNameTag);
+            document.body.removeChild(modal);
         };
         
         // Build modal
-        buttonContainerNameTag.append(cancelButtonNameTag, saveButtonNameTag);
-        modalContentNameTag.append(inputNameTag, buttonContainerNameTag);
-        modalNameTag.appendChild(modalContentNameTag);
-        document.body.appendChild(modalNameTag);
+        buttonContainer.append(cancelButton, saveButton);
+        popupContainer.append(title, input, buttonContainer);
+        modal.appendChild(popupContainer);
+        document.body.appendChild(modal);
         
         // Focus input and handle Enter key
-        inputNameTag.focus();
-        inputNameTag.onkeydown = (e) => {
-            if (e.key === 'Enter') saveButtonNameTag.click();
+        input.focus();
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') saveButton.click();
         };
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
     });
 
     // make it appear a popup when clicked that has a input field to change the name tag
@@ -481,8 +501,6 @@ function formatEventTime(time: time_raw): string {
     return time.date || time.time || '';
 }
 
-
-
 /*
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
@@ -602,14 +620,8 @@ async function backToMainViewFromNotification(): Promise<void> {
     currentTrackingNumber = null; // Reset tracking number
     USER_PACKAGES_DATA = trackingData; // Update global state
 
-    // set the name tags for the packages
-    USER_PACKAGES_DATA.forEach(async pkg => {
-        // get name tag from telegram storage
-        await get_tracking_number_name_tag(pkg.tracking_number)
-        const key = `${user_id_hash}_${pkg.tracking_number}`;
-        let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
-        console.log('name_tag in return from notification', name_tag)
-    })
+    // get the name tags for the packages
+    await get_tracking_number_name_tags(USER_PACKAGES_DATA.map(pkg => pkg.tracking_number));
     // render the list after loading the data
     renderTrackingList();
 
@@ -901,7 +913,6 @@ async function get_tracking_number_name_tags(tracking_numbers: string[]): Promis
 
 
 /// Show add tracking number dialog
-// TODO: user should add a name tag to the package that will be saved in the telegram env memory
 function showAddTrackingDialog(): void {
     // disable the button, make enabled after removing the elements added in this function
     tg.MainButton.hide();
