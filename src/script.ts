@@ -460,13 +460,16 @@ function renderTrackingList(): void {
 
     USER_PACKAGES_DATA.forEach(pkg => {
         // try to get the name tag from the telegram storage
-        let name_tag = get_tracking_number_name_tag(pkg.tracking_number);
+        let name_tag = USER_PACKAGES_NAME_TAGS.get(`${user_id_hash}_${pkg.tracking_number}`);
 
         const item = document.createElement('div');
         item.className = 'tracking-item';
         item.innerHTML = `
             <div>
-                <div class="tracking-number">${name_tag} • ${pkg.tracking_number}</div>
+                <div class="tracking-number">
+                ${name_tag ? `<span class="name-tag">${name_tag}</span> • ` : ''}
+                ${pkg.tracking_number}
+                </div>
                 <div class="tracking-status">${pkg.latest_event?.description} • ${pkg.latest_event?.time?.date} • ${pkg.latest_event?.time?.time}</div>
             </div>
             <div>></div>
