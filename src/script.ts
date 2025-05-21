@@ -1,7 +1,10 @@
 /*
-    TODO:
+    Author : Karol Bura
 
-    Add button to delete a tracking number, from the telegram memory list as well as from the database relation list
+    Description : Simple telegram mini app for detailed package shipping tracking and telegram notification updates.
+    Version : 1.0.0
+    Date : 22/05/2025
+    License : MIT
 
 */
 
@@ -14,8 +17,6 @@
 */
 
 const BACKEND_LINK = 'https://teletrack-server-20b6f79a4151.herokuapp.com';
-// const BACKEND_LINK = 'https://webhook.lemoncardboard.uk';
-// const BACKEND_LINK = 'http://127.0.0.1:8080';
 /// import the csv carrier list as array from carriers.ts 
 import {getKeyNameList} from './carriers.js';
 
@@ -66,7 +67,7 @@ async function initApp() {
         // show details of notification
         showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
     } else {
-        // start normally
+        // start normally, this is also called when the notification details are closed in @backToMainViewFromNotification()
 
         // Back button handling
         tg.BackButton.onClick(backToMainView);
@@ -87,9 +88,7 @@ async function initApp() {
 /* 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
-    TYPE "SAFETY"
-
-    tracking data json form on the server
+    TRACKING DATA JSON STRUCTURE TO PARSE SERVER RESPONSES
 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
@@ -512,6 +511,11 @@ const emptyState = document.getElementById('empty-state') as HTMLElement;
 
     ELEMENTS FUNCTIONS
 
+    TODO: [UX] display tracking details like cards in a stack (apple wallet tickets/passes alike).
+    scrolling down makes the stack move up and cover the previous cards with new cards, more information from the tracking
+    events/details should be displayed in the card to make it bigger and show the effect more
+
+
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
 
@@ -763,6 +767,7 @@ async function handleRemoveTrackingNumber(tracking_number: string) {
         // untracked number for the user
         currentTrackingNumber = null;
         USER_PACKAGES_DATA = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
+        remove_tracking_number_name_tag(tracking_number);
         backToMainView();
         tg.showAlert("Number won't be tracked anymore");
         return;
@@ -813,6 +818,14 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
         return 1;
     }
 }
+
+/*
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+    NAME TAG STORAGE MANAGER FUNCTION, BOTH CASHED LOCAL AND TELEGRAM CLOUD
+
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+*/
 
 /// function to store the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} in the telegram cloud storage
 async function set_tracking_number_name_tag(tracking_number: string, name_tag: string): Promise<boolean> {
@@ -877,6 +890,26 @@ async function get_tracking_number_name_tags(tracking_numbers: string[]): Promis
             }
         })
     })
+}
+
+/// function for removing the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} from the telegram cloud storage
+async function remove_tracking_number_name_tag(tracking_number: string): Promise<boolean> {
+    const key = `${user_id_hash}_${tracking_number}`;
+    return new Promise<boolean>((resolve) => {
+        // remove from cloud storage
+        tg.CloudStorage.removeItem(key, (error, result) => {
+            if (error) {
+                console.error("Storage error:", error);
+                resolve(false);
+            } else if (result) {
+                // remove from local storage
+                USER_PACKAGES_NAME_TAGS.delete(key);
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+    });
 }
 
 /*
@@ -1107,9 +1140,7 @@ function showAddTrackingDialog(): void {
 
     API RELATED FUNCTIONS, HTTP REQUESTS
     
-    TODO: fix these, add proper returns and error handling
-    TODO: move the "double" request building to a helper function that actually works logically
-    TODO: create alerts for the user when a request is completed
+    TODO: move the "double" request building to a helper function
 
     list of custom 5XX codes:
             520 - user doesn't exist yet, client should send request to create user
