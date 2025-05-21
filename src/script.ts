@@ -182,6 +182,7 @@ function createPackageElement(pkg: PackageData) {
     const nameTag = document.createElement('h3');
     nameTag.className = 'package-name-tag';
     nameTag.textContent = name_tag ?? "set name tag"; // default if undefined
+    nameTag.style.cssText = name_tag ? `color: black;` : `color: #007AFF`; // change color if name tag is not set
 
     // Add click handler to enable editing the name tag
     nameTag.addEventListener('click', async (e) => {
