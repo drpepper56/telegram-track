@@ -606,16 +606,14 @@ async function backToMainViewFromNotification(): Promise<void> {
     const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
     currentTrackingNumber = null; // Reset tracking number
     USER_PACKAGES_DATA = trackingData; // Update global state
+
     // set the name tags for the packages
     USER_PACKAGES_DATA.forEach(async pkg => {
         // get name tag from telegram storage
-        let name_tag = await get_tracking_number_name_tag(pkg.tracking_number);
-        console.log('name_tags in back from notif', name_tag)
-        // set the name tag to the package
-        if (name_tag !== undefined) {
-            const key = `${user_id_hash}_${pkg.tracking_number}`;
-            USER_PACKAGES_NAME_TAGS.set(key, name_tag);
-        }
+        await get_tracking_number_name_tag(pkg.tracking_number);
+        const key = `${user_id_hash}_${pkg.tracking_number}`;
+        let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
+        console.log('name_tag in init notification', name_tag)
     });
 
     // render the list after loading the data
@@ -832,10 +830,10 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
 }
 
 /// function to store the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} in the telegram cloud storage
-async function set_tracking_number_name_tag(tracking_number: string, name_tag: string) {
+async function set_tracking_number_name_tag(tracking_number: string, name_tag: string): Promise<void> {
     const key = `${user_id_hash}_${tracking_number}`;
     // save in cloud storage
-    await tg.CloudStorage.setItem(key, name_tag, (error, result) => {
+    tg.CloudStorage.setItem(key, name_tag, (error, result) => {
         if (error) {
             // didn't store :'(
             console.error("Storage error:", error);
@@ -849,9 +847,9 @@ async function set_tracking_number_name_tag(tracking_number: string, name_tag: s
 }
 
 /// function to get the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} from the telegram cloud storage
-async function get_tracking_number_name_tag(tracking_number: string){
+async function get_tracking_number_name_tag(tracking_number: string): Promise<void> {
     const key = `${user_id_hash}_${tracking_number}`;
-    await tg.CloudStorage.getItem(key,  (error, value) => {
+    tg.CloudStorage.getItem(key,  (error, value) => {
         if (error) {
             console.error("Storage error:", error);
         } else if (value !== null) {
