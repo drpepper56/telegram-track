@@ -67,6 +67,7 @@ async function initApp() {
         // set the name tag to the package
         if (name_tag !== undefined) {
             const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
+            console.log('setting name tags before notification display', key, name_tag)
             USER_PACKAGES_NAME_TAGS.set(key, name_tag);
         }
         // show details of notification
@@ -175,12 +176,14 @@ function createPackageElement(pkg: PackageData) {
     trackingNumber.textContent = `#${pkg.tracking_number}`;
 
     // Assuming USER_PACKAGES_NAME_TAGS is a Map<string, string>
-    let name_tag: string | undefined = USER_PACKAGES_NAME_TAGS.get(`${user_id_hash}_${pkg.tracking_number}`);
+    const key = `${user_id_hash}_${pkg.tracking_number}`
+    let name_tag: string | undefined = USER_PACKAGES_NAME_TAGS.get(key);
+    console.log('tag got from cloud storage in display data', key, name_tag)
 
     // Create the name tag element
     const nameTag = document.createElement('h3');
     nameTag.className = 'package-name-tag';
-    nameTag.textContent = name_tag ?? "set name tag"; // default if undefined
+    nameTag.textContent = name_tag ? name_tag : "set name tag"; // default if undefined
     nameTag.style.cssText = name_tag ? `color: black;` : `color: #007AFF`; // change color if name tag is not set
 
     // Add click handler to enable editing the name tag
