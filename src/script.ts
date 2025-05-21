@@ -533,7 +533,9 @@ function renderTrackingList(): void {
 
     USER_PACKAGES_DATA.forEach(pkg => {
         // try to get the name tag from the telegram storage
-        let name_tag = USER_PACKAGES_NAME_TAGS.get(`${user_id_hash}_${pkg.tracking_number}`);
+        let key = `${user_id_hash}_${pkg.tracking_number}`
+        let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
+        console.log('name_tag', name_tag, key)
 
         const item = document.createElement('div');
         item.className = 'tracking-item';
@@ -611,6 +613,7 @@ async function backToMainViewFromNotification(): Promise<void> {
     USER_PACKAGES_DATA.forEach(async pkg => {
         // get name tag from telegram storage
         let name_tag = await get_tracking_number_name_tag(pkg.tracking_number);
+        console.log('name_tags in back from notif', name_tag)
         // set the name tag to the package
         if (name_tag !== undefined) {
             const key = `${user_id_hash}_${pkg.tracking_number}`;
@@ -864,6 +867,7 @@ async function get_tracking_number_name_tag(tracking_number: string): Promise<st
             console.error("Storage error:", error);
             return undefined;
         } else {
+            USER_PACKAGES_NAME_TAGS.set(key, value!);
             return value; 
         }
       })
