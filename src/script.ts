@@ -859,18 +859,15 @@ async function set_tracking_number_name_tag(tracking_number: string, name_tag: s
 /// function to get the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} from the telegram cloud storage
 async function get_tracking_number_name_tag(tracking_number: string): Promise<string | undefined> {
     const key = `${user_id_hash}_${tracking_number}`;
-    console.log('key', key);
-
     tg.CloudStorage.getItem(key, (error, value) => {
-        console.log('getting name tag...')
         if (error) {
             console.error("Storage error:", error);
             return undefined;
         } else {
-            console.log('name tag for', tracking_number,  value)
             return value; 
         }
       })
+    console.log('why are you here')
     return undefined;
 }
 
