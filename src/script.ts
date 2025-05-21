@@ -63,10 +63,11 @@ async function initApp() {
         USER_PACKAGES_DATA = [NOTIFICATION_DATA!];
 
         // get name tag from telegram storage
-        await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number);
-        const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
-        let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
-        console.log('name_tag in init notification', name_tag)
+        await get_tracking_number_name_tag(NOTIFICATION_DATA!.tracking_number).then((_) => {
+            const key = `${user_id_hash}_${NOTIFICATION_DATA!.tracking_number}`;
+            let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
+            console.log('name_tag in notification', name_tag)
+        }).catch((err) => {throw new Error(err)});
     
         // show details of notification
         showTrackingDetails(NOTIFICATION_DATA!.tracking_number);
@@ -82,10 +83,11 @@ async function initApp() {
         // set the name tags for the packages
         USER_PACKAGES_DATA.forEach(async pkg => {
             // get name tag from telegram storage
-            await get_tracking_number_name_tag(pkg.tracking_number);
-            const key = `${user_id_hash}_${pkg.tracking_number}`;
-            let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
-            console.log('name_tag in init notification', name_tag)
+            await get_tracking_number_name_tag(pkg.tracking_number).then((_) => {;
+                const key = `${user_id_hash}_${pkg.tracking_number}`;
+                let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
+                console.log('name_tag in init', name_tag)
+            }).catch((err) => {throw new Error(err)});
         });
 
         renderTrackingList();
@@ -610,10 +612,11 @@ async function backToMainViewFromNotification(): Promise<void> {
     // set the name tags for the packages
     USER_PACKAGES_DATA.forEach(async pkg => {
         // get name tag from telegram storage
-        await get_tracking_number_name_tag(pkg.tracking_number);
-        const key = `${user_id_hash}_${pkg.tracking_number}`;
-        let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
-        console.log('name_tag in init notification', name_tag)
+        await get_tracking_number_name_tag(pkg.tracking_number).then((_) => {
+            const key = `${user_id_hash}_${pkg.tracking_number}`;
+            let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
+            console.log('name_tag in return from notification', name_tag)
+        }).catch((err) => {throw new Error(err)});
     });
 
     // render the list after loading the data
