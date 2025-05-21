@@ -178,8 +178,8 @@ function createPackageElement(pkg: PackageData) {
 
     // Assuming USER_PACKAGES_NAME_TAGS is a Map<string, string>
     const key = `${user_id_hash}_${pkg.tracking_number}`
-    let name_tag: string | undefined = USER_PACKAGES_NAME_TAGS.get(key);
-    console.log('tag got from cloud storage in display data', key, name_tag)
+    let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
+    console.log('tag got from local in display data', key, name_tag)
 
     // Create the name tag element
     const nameTag = document.createElement('h3');
@@ -807,11 +807,8 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
         // registered
         tg.showAlert('Tracking number registered!');
         // store the tracking number with a tag
-        if (name_tag !== undefined) {
-            if (name_tag.length > 0) {
-                let store_name_tag_result = set_tracking_number_name_tag(tracking_number, name_tag);
-                console.log('store_name_tag_result', store_name_tag_result)
-            }
+        if (name_tag !== undefined && name_tag.length > 0) {
+            set_tracking_number_name_tag(tracking_number, name_tag);
         }
         return 0;
     } else if (result === 541) {
@@ -840,41 +837,33 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
 }
 
 /// function to store the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} in the telegram cloud storage
-async function set_tracking_number_name_tag(tracking_number: string, name_tag: string): Promise<boolean> {
+async function set_tracking_number_name_tag(tracking_number: string, name_tag: string) {
     const key = `${user_id_hash}_${tracking_number}`;
-    console.log('key', key);
-
-    // set locally
-    USER_PACKAGES_NAME_TAGS.set(key, name_tag); 
-
     // save in cloud storage
-    tg.CloudStorage.setItem(key, name_tag, (error, _) => {
+    tg.CloudStorage.setItem(key, name_tag, (error, result) => {
         if (error) {
+            // didn't store :'(
             console.error("Storage error:", error);
-            // didn't store
-            return false;
+        } else if (result) {
+            // stored so set locally too
+            USER_PACKAGES_NAME_TAGS.set(key, name_tag); 
         } else {
-            // stored
-            return true; 
+            console.log('what?')
         }
       });
-    return false;
 }
 
 /// function to get the {KEY: user_id_hash_|CONCAT|tracking_number, VALUE: name_tag} from the telegram cloud storage
-async function get_tracking_number_name_tag(tracking_number: string): Promise<string | undefined> {
+async function get_tracking_number_name_tag(tracking_number: string){
     const key = `${user_id_hash}_${tracking_number}`;
-    tg.CloudStorage.getItem(key, (error, value) => {
+    tg.CloudStorage.getItem(key, async (error, value) => {
         if (error) {
             console.error("Storage error:", error);
-            return undefined;
         } else {
             USER_PACKAGES_NAME_TAGS.set(key, value!);
-            return value; 
         }
       })
     console.log('why are you here')
-    return undefined;
 }
 
 /*
