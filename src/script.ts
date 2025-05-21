@@ -1,10 +1,6 @@
 /*
     TODO:
 
-    Save the tracking number with a tag for the package set by the user or a default in telegram storage.
-
-    When the app is opened with notification parameters {tracking number}, only request the events for that number
-
     Add button to delete a tracking number, from the telegram memory list as well as from the database relation list
 
 */
@@ -326,8 +322,6 @@ function createPackageElement(pkg: PackageData) {
     buttonContainer.style.gap = '10px';
     buttonContainer.style.marginTop = '10px';
 
-    console.log('pkg.is_user_tracked ', pkg.is_user_tracked)
-
     // Track/Untrack button - conditionally shown based on is_user_tracked
     if (pkg.is_user_tracked !== undefined) {
         if (pkg.is_user_tracked) {
@@ -392,8 +386,6 @@ function createPackageElement(pkg: PackageData) {
     let wrapper = document.createElement('div');
     wrapper.appendChild(container);
     wrapper.appendChild(buttonContainer);
-
-    // console.info(wrapper);
 
     return wrapper
 }
@@ -534,7 +526,6 @@ function renderTrackingList(): void {
 
     // exit early if empty or undefined
     if (!USER_PACKAGES_DATA || USER_PACKAGES_DATA.length === 0) {
-        console.log("empty or undefined")
         updateEmptyState();
         return;
     }    
@@ -543,7 +534,6 @@ function renderTrackingList(): void {
         // try to get the name tag from the telegram storage
         let key = `${user_id_hash}_${pkg.tracking_number}`
         let name_tag = USER_PACKAGES_NAME_TAGS.get(key);
-        console.log('name_tag', name_tag, key)
 
         const item = document.createElement('div');
         item.className = 'tracking-item';
@@ -578,10 +568,8 @@ function showTrackingDetails(tracking_number: string) {
     
     const found = USER_PACKAGES_DATA.find(pkg => pkg.tracking_number === tracking_number);
     if (!found) {
-        console.log("not found data to display")
         return
     }
-    console.log('found', found);
     // Load and display tracking events
     renderTrackingDetails(found);
 }
@@ -589,7 +577,6 @@ function showTrackingDetails(tracking_number: string) {
 /// Render tracking events for a package
 async function renderTrackingDetails(tracking_details: PackageData) {
     detailsView.innerHTML = '';
-    console.log('tracking_details', tracking_details);
     const trackingDetailsElement = createPackageElement(tracking_details)
     detailsView.appendChild(trackingDetailsElement);
 }
@@ -608,8 +595,6 @@ function backToMainView(): void {
 
 // Back button handling for notification view
 async function backToMainViewFromNotification(): Promise<void> {
-    console.log('what are you doing here again')
-
     currentView = 'main';
     currentTrackingNumber = null;
     mainView.style.display = 'block';
@@ -644,7 +629,6 @@ async function backToMainViewFromNotification(): Promise<void> {
 async function notification_handler(): Promise<boolean> {
     // get the deep link url value and cheat this stupid environment, 64 characters
     let startParam = window.location.search;
-    console.log('startParam', startParam)
     // try to get param
     try {
         // json -> base64 -> json decoding
@@ -653,8 +637,6 @@ async function notification_handler(): Promise<boolean> {
         const urlDecoded = decodeURIComponent(encodedParam!);
         const base64Decoded = atob(urlDecoded.replace(/-/g, '+').replace(/_/g, '/'));
         const decodedData = JSON.parse(base64Decoded);
-        // get the tracking package data number
-        console.log(decodedData.package_update);
 
         // request the tracking data
         let response = await get_tracking_data(decodedData.package_update).then((data) => data!).catch((err) => console.log(err));
@@ -800,7 +782,6 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
     // 2 for not registered but retry with carrier
     // 3 for max quota reached
     
-    console.log('trying with no carrier')
     const result = await register_one_tracking_number(tracking_number, carrier_key);
     
     if (result === 0) {
@@ -820,8 +801,6 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
         tg.showAlert('Tracking number not found');
         return 1;
     } else if (result === 530) {
-        // Carrier not found, show carrier selection
-        console.log('not found with no carrier')
         // show carrier selection
         return 2;
     } else if (result === 540) {
@@ -830,7 +809,6 @@ async function handleAddTrackingNumber(tracking_number: string, carrier_key?: nu
         return 3;
     } else {
         // Some other error
-        console.log('result', result);
         tg.showAlert('Failed to add tracking number');
         return 1;
     }
@@ -852,7 +830,6 @@ async function set_tracking_number_name_tag(tracking_number: string, name_tag: s
                 USER_PACKAGES_NAME_TAGS.set(key, name_tag); 
                 resolve(true);
             } else {
-                console.log('what?');
                 resolve(false);
             }
         });
@@ -891,7 +868,6 @@ async function get_tracking_number_name_tags(tracking_numbers: string[]): Promis
                 resolve(false);
             } else if (values !== null) {
                 // set the name tags in the local storage
-                console.log('values from multiple key query', values)
                 for (const key in values) {
                     USER_PACKAGES_NAME_TAGS.set(key, values[key]);
                 }
@@ -1152,8 +1128,7 @@ function showAddTrackingDialog(): void {
 
 /// this is the worst one
 /// Function for creating a user and resending a request if the user has been created
-async function create_user_request(headers: any, prime_path: string, prime_json_data: any): Promise<Response | undefined> {
-    console.log("USER DOESN'T EXIST YET");
+async function create_user_request(headers: any, prime_path: string, prime_json_data?: any): Promise<Response | undefined> {
     try {
         // create the json for user details
         const user_details = await get_user_details();
@@ -1184,14 +1159,12 @@ async function create_user_request(headers: any, prime_path: string, prime_json_
                                                                                         
     } catch (parseError) {
         /* the more errors you get the smarter you are */
-        console.error('Failed to parse 520 response:', parseError);
         throw parseError
     }
 }
 
 /// Function for creating a user and resending a request without body if the user has been created
 async function create_user_request_no_body(headers: any, prime_path: string): Promise<Response | undefined> {
-    console.log("USER DOESN'T EXIST YET");
     try {
         // create the json for user details
         const user_details = await get_user_details();
@@ -1221,7 +1194,6 @@ async function create_user_request_no_body(headers: any, prime_path: string): Pr
                                                                                         
     } catch (parseError) {
         /* the more errors you get the smarter you are */
-        console.error('Failed to parse 520 response:', parseError);
         throw parseError
     }
 }
@@ -1263,7 +1235,6 @@ async function get_tracking_data(tracking_number: string): Promise<JSON | number
         } 
         
         if (prime_response.ok) {
-            console.log(success_mes)
             return await prime_response.json();
         } else if (prime_response.status == 525) {
             return await prime_response.status;
@@ -1290,9 +1261,7 @@ async function register_one_tracking_number(tracking_number: string, carrier?: n
         "number": tracking_number,
         "carrier": carrier ? carrier : Number(null)
     };
-    // console.log(prime_json_data);
     const path = '/register_tracking_number';
-    // console.log(prime_json_data);
 
     try {
         // headers
@@ -1309,8 +1278,6 @@ async function register_one_tracking_number(tracking_number: string, carrier?: n
             body: JSON.stringify(prime_json_data)
         });
 
-        console.log('prime_response', prime_response);
-
         // /* the more errors you get the smarter you are */
         // const responseClone = response.clone();
         if (prime_response.status == 520) {
@@ -1321,7 +1288,6 @@ async function register_one_tracking_number(tracking_number: string, carrier?: n
         if (prime_response.status > 520) {
             return prime_response.status
         }  else if (prime_response.ok) {
-            console.log("registered the number successfully");
             return 0
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
@@ -1370,10 +1336,10 @@ async function loadTrackedPackages(): Promise<PackageData[] | undefined> {
         
         if (prime_response.ok) {
             const response_json = await prime_response.json();
-            console.log("user data retrieved successfully")
             console.log(response_json);
             return response_json as PackageData[];
         } else if (!prime_response.ok) {
+            console.log('Response status error', prime_response.status, prime_response.json());
             throw new Error('bad response error');
         } else {
             /* the more errors you get the smarter you are */
@@ -1393,9 +1359,7 @@ async function removeTrackingNumber(tracking_number: string): Promise<number | u
     const prime_json_data = {
         "number": tracking_number
     };
-    // console.log(prime_json_data);
     const path = '/delete_tracking_number';
-    // console.log(prime_json_data);
 
     try {
         // headers
@@ -1412,8 +1376,6 @@ async function removeTrackingNumber(tracking_number: string): Promise<number | u
             body: JSON.stringify(prime_json_data)
         });
 
-        console.log('prime_response', prime_response);
-
         // /* the more errors you get the smarter you are */
         // const responseClone = response.clone();
         if (prime_response.status == 520) {
@@ -1424,7 +1386,6 @@ async function removeTrackingNumber(tracking_number: string): Promise<number | u
         
         if (prime_response.status == 536) {
             // no relation record found to delete
-            console.log('no relation record found to delete');
             return prime_response.status
         } else if (prime_response.ok) {
             return 0
@@ -1448,9 +1409,7 @@ async function untrackNumber(tracking_number: string): Promise<number | undefine
     const prime_json_data = {
         "number": tracking_number
     };
-    // console.log(prime_json_data);
     const path = '/stop_tracking_number';
-    // console.log(prime_json_data);
 
     try {
         // headers
@@ -1466,8 +1425,6 @@ async function untrackNumber(tracking_number: string): Promise<number | undefine
             headers,
             body: JSON.stringify(prime_json_data)
         });
-
-        console.log('prime_response', prime_response);
 
         // /* the more errors you get the smarter you are */
         // const responseClone = response.clone();
@@ -1502,9 +1459,7 @@ async function retrackNumber(tracking_number: string): Promise<number | undefine
     const prime_json_data = {
         "number": tracking_number
     };
-    // console.log(prime_json_data);
     const path = '/retrack_stopped_number';
-    // console.log(prime_json_data);
 
     try {
         // headers
@@ -1521,8 +1476,6 @@ async function retrackNumber(tracking_number: string): Promise<number | undefine
             body: JSON.stringify(prime_json_data)
         });
 
-        console.log('prime_response', prime_response);
-
         // /* the more errors you get the smarter you are */
         // const responseClone = response.clone();
         if (prime_response.status == 520) {
@@ -1534,7 +1487,6 @@ async function retrackNumber(tracking_number: string): Promise<number | undefine
         if ((prime_response.status == 533) || (prime_response.status == 534) || (prime_response.status == 525)) {
             return prime_response.status;
         } else if (prime_response.ok) {
-            console.log('retracked number');
             return 0
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());  
