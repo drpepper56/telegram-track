@@ -515,6 +515,11 @@ const emptyState = document.getElementById('empty-state') as HTMLElement;
     scrolling down makes the stack move up and cover the previous cards with new cards, more information from the tracking
     events/details should be displayed in the card to make it bigger and show the effect more
 
+    TODO: Share a tracking number page with another user via a phone number or telegram username
+    make a send function and a receive function, can work like a mail service with the server acting as the mailman, holding a
+    reference to the sender, receiver and the tracking number data, the addressed will open the page from a inline link
+    that must open a notification handler made specifically to open data the addressed doesn't have registered on the server
+
 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
@@ -626,6 +631,8 @@ async function backToMainViewFromNotification(): Promise<void> {
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 
     NOTIFICATION HANDLERS
+
+    TODO: [server side] inject the name tag into the notification message
 
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
 */
@@ -1141,6 +1148,7 @@ function showAddTrackingDialog(): void {
     API RELATED FUNCTIONS, HTTP REQUESTS
     
     TODO: move the "double" request building to a helper function
+    TODO: check sync status after re-subscribing to a tracking number
 
     list of custom 5XX codes:
             520 - user doesn't exist yet, client should send request to create user
