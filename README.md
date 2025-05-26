@@ -1,7 +1,7 @@
 # Package Tracker Telegram Mini App
 
 This is a Telegram Mini App designed to help you track your packages.
-More about this project on: [blog.lemoncardboard.uk](blog.lemoncardboard.uk)
+More about this project on: [blog.lemoncardboard.uk](https://blog.lemoncardboard.uk)
 
 ## Features
 
