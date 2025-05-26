@@ -1149,6 +1149,7 @@ function showAddTrackingDialog(): void {
     
     TODO: move the "double" request building to a helper function
     TODO: check sync status after re-subscribing to a tracking number
+    TODO: remove user request
 
     list of custom 5XX codes:
             520 - user doesn't exist yet, client should send request to create user
