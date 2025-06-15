@@ -596,10 +596,11 @@ function backToMainView(): void {
     currentTrackingNumber = null;
     mainView.style.display = 'block';
     detailsView.style.display = 'none';
-    renderTrackingList();
-
     // show back button and assign the back function to it
     tg.BackButton.hide();
+
+    // render async after changing the back button
+    renderTrackingList();
 }
 
 // Back button handling for notification view
@@ -616,15 +617,16 @@ async function backToMainViewFromNotification(): Promise<void> {
 
     // get the name tags for the packages
     await get_tracking_number_name_tags(USER_PACKAGES_DATA.map(pkg => pkg.tracking_number));
-    // render the list after loading the data
-    renderTrackingList();
-
+    
     // Back button handling
     tg.BackButton.offClick(backToMainViewFromNotification);
     tg.BackButton.onClick(backToMainView);
-
+    
     // hide back button for main page
     tg.BackButton.hide();
+    
+    // render (async after changing the back button) the list after loading the data
+    renderTrackingList();
 }
 
 /*
