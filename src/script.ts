@@ -592,12 +592,13 @@ async function renderTrackingDetails(tracking_details: PackageData) {
 
 /// Back button handling to main view
 function backToMainView(): void {
+    // hide back button
+    tg.BackButton.hide();
+
     currentView = 'main';
     currentTrackingNumber = null;
     mainView.style.display = 'block';
     detailsView.style.display = 'none';
-    // show back button and assign the back function to it
-    tg.BackButton.hide();
 
     // render async after changing the back button
     renderTrackingList();
@@ -610,6 +611,9 @@ async function backToMainViewFromNotification(): Promise<void> {
     mainView.style.display = 'block';
     detailsView.style.display = 'none';
 
+    // hide back button for main page
+    tg.BackButton.hide();
+
     // finish the init function
     const trackingData = await loadTrackedPackages().then((data) => data!).catch((err) => {throw new Error(err)});
     currentTrackingNumber = null; // Reset tracking number
@@ -621,10 +625,7 @@ async function backToMainViewFromNotification(): Promise<void> {
     // Back button handling
     tg.BackButton.offClick(backToMainViewFromNotification);
     tg.BackButton.onClick(backToMainView);
-    
-    // hide back button for main page
-    tg.BackButton.hide();
-    
+
     // render (async after changing the back button) the list after loading the data
     renderTrackingList();
 }
