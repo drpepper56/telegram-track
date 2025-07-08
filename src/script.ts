@@ -1393,7 +1393,7 @@ async function loadTrackedPackages(): Promise<PackageData[] | undefined> {
         
         if (prime_response.ok) {
             const response_json = await prime_response.json();
-            console.log(response_json);
+            // console.log(response_json);
             return response_json as PackageData[];
         } else if (!prime_response.ok) {
             console.log('Response status error', prime_response.status, prime_response.json());
