@@ -52,6 +52,8 @@ async function initApp() {
     const user_details = await get_user_details();
     user_id_hash = user_details.user_id_hash;
 
+    console.log('hello');
+
     const notification_present = await notification_handler();
     if (notification_present) {
         // start from notification
@@ -1308,7 +1310,7 @@ async function get_tracking_data(tracking_number: string): Promise<JSON | number
 async function register_one_tracking_number(tracking_number: string, carrier?: number): Promise<number | undefined> {
     // return 0 for OK, 1 for retry with carrier
 
-    console.log("registering...")
+    console.log('registering...');
 
     // create the json to send as payload
     const prime_json_data = {
