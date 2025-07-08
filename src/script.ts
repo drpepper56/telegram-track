@@ -1106,13 +1106,13 @@ function showAddTrackingDialog(): void {
         // 3 for max quota reached
 
         switch (register_result) {
-            case 0: closeModal();
-            case 1: closeModal();
+            case 0 | 1 | 3: 
+                closeModal();
             case 2: {
+                tg.showAlert("Retry with carrier");
                 carrierInput.focus();
                 carrierResults.style.display = 'none';
             }
-            case 3: closeModal();
         }
     });
 
