@@ -936,6 +936,12 @@ function showAddTrackingDialog(): void {
     // disable the button, make enabled after removing the elements added in this function
     tg.MainButton.hide();
 
+    // Handle cancel, close the modal
+    const closeModal = () => {
+        document.body.removeChild(modal);
+        tg.MainButton.show();
+    };
+
     // Load carriers data
     let carriers: {key: number, name_en: string}[] = getKeyNameList()
 
@@ -977,17 +983,16 @@ function showAddTrackingDialog(): void {
     nameTagInput.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
     nameTagInput.style.color = 'var(--tg-theme-text-color, #000000)';
 
-    // Carrier selection elements (initially hidden)
+    // Carrier selection elements
     const carrierContainer = document.createElement('div');
-    carrierContainer.style.display = 'none';
     carrierContainer.style.flexDirection = 'column';
     carrierContainer.style.gap = '8px';
-
+    // Carrier title
     const carrierTitle = document.createElement('div');
     carrierTitle.textContent = 'Select Carrier';
     carrierTitle.style.fontWeight = 'bold';
     carrierTitle.style.fontSize = '14px';
-
+    // Carrier search box
     const carrierInput = document.createElement('input');
     carrierInput.type = 'text';
     carrierInput.placeholder = 'Search carrier...';
@@ -996,13 +1001,64 @@ function showAddTrackingDialog(): void {
     carrierInput.style.border = '1px solid var(--tg-theme-hint-color, #707579)';
     carrierInput.style.backgroundColor = 'var(--tg-theme-bg-color, #ffffff)';
     carrierInput.style.color = 'var(--tg-theme-text-color, #000000)';
-
+    // Carrier search results
     const carrierResults = document.createElement('div');
     carrierResults.style.display = 'none';
     carrierResults.style.flexDirection = 'column';
     carrierResults.style.gap = '4px';
     carrierResults.style.maxHeight = '200px';
     carrierResults.style.overflowY = 'auto';
+
+    // initialize selected carrier
+    let selectedCarrier: {key: number, name_en: string} | null = null;
+    // handle carrier input
+    carrierInput.addEventListener('input', () => {
+        const searchTerm = carrierInput.value.toLowerCase();
+        carrierResults.innerHTML = '';
+        
+        if (!searchTerm) {
+            carrierResults.style.display = 'none';
+            return;
+        }
+        const filtered = carriers.filter(carrier => 
+            carrier.name_en.toLowerCase().includes(searchTerm)
+        );
+        if (filtered.length === 0) {
+            carrierResults.style.display = 'none';
+            return;
+        }
+        
+        // show search results element
+        carrierResults.style.display = 'flex';
+        
+        // render each carrier matching the search
+        filtered.forEach(carrier => {
+            const option = document.createElement('div');
+            option.textContent = carrier.name_en;
+            option.style.padding = '8px 12px';
+            option.style.borderRadius = '4px';
+            option.style.cursor = 'pointer';
+            option.style.backgroundColor = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
+            option.style.color = 'var(--tg-theme-text-color, #000000)';
+            
+            // handle select carrier 
+            option.addEventListener('click', () => {
+                selectedCarrier = carrier;
+                carrierInput.value = carrier.name_en;
+                carrierResults.style.display = 'none';
+            });
+            
+            option.addEventListener('mouseenter', () => {
+                option.style.backgroundColor = 'var(--tg-theme-hint-color, #707579)';
+            });
+            
+            option.addEventListener('mouseleave', () => {
+                option.style.backgroundColor = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
+            });
+            
+            carrierResults.appendChild(option);
+        });
+    });
 
     carrierContainer.appendChild(carrierTitle);
     carrierContainer.appendChild(carrierInput);
@@ -1022,6 +1078,8 @@ function showAddTrackingDialog(): void {
     cancelButton.style.border = 'none';
     cancelButton.style.background = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
     cancelButton.style.color = 'var(--tg-theme-text-color, #000000)';
+    // Handle cancel
+    cancelButton.addEventListener('click', closeModal);
 
     // Create add button
     const addButton = document.createElement('button');
@@ -1031,6 +1089,30 @@ function showAddTrackingDialog(): void {
     addButton.style.border = 'none';
     addButton.style.background = 'var(--tg-theme-button-color, #2481cc)';
     addButton.style.color = 'var(--tg-theme-button-text-color, #ffffff)';
+    // Handle add
+    addButton.addEventListener('click', async () => {
+        const nameTagValue = nameTagInput.value.trim(); // Get the name tag value
+        const register_result = await handleAddTrackingNumber(
+            input.value, 
+            selectedCarrier?.key, 
+            nameTagValue || undefined
+        );
+        
+        // 0 for registered, 
+        // 1 for not registered,
+        // 2 for not registered but retry with carrier
+        // 3 for max quota reached
+
+        switch (register_result) {
+            case 0: closeModal();
+            case 1: closeModal();
+            case 2: {
+                carrierInput.focus();
+                carrierResults.style.display = 'none';
+            }
+            case 3: closeModal();
+        }
+    });
 
     // Add elements to container
     buttonContainer.appendChild(cancelButton);
@@ -1058,80 +1140,7 @@ function showAddTrackingDialog(): void {
     // Add to document
     document.body.appendChild(modal);
     
-    // Handle cancel
-    const closeModal = () => {
-        document.body.removeChild(modal);
-        tg.MainButton.show();
-    };
     
-    cancelButton.addEventListener('click', closeModal);
-    
-    // Handle carrier input
-    let selectedCarrier: {key: number, name_en: string} | null = null;
-    
-    carrierInput.addEventListener('input', () => {
-        const searchTerm = carrierInput.value.toLowerCase();
-        carrierResults.innerHTML = '';
-        
-        if (!searchTerm) {
-            carrierResults.style.display = 'none';
-            return;
-        }
-        
-        const filtered = carriers.filter(carrier => 
-            carrier.name_en.toLowerCase().includes(searchTerm)
-        );
-        
-        if (filtered.length === 0) {
-            carrierResults.style.display = 'none';
-            return;
-        }
-        
-        carrierResults.style.display = 'flex';
-        
-        filtered.forEach(carrier => {
-            const option = document.createElement('div');
-            option.textContent = carrier.name_en;
-            option.style.padding = '8px 12px';
-            option.style.borderRadius = '4px';
-            option.style.cursor = 'pointer';
-            option.style.backgroundColor = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
-            option.style.color = 'var(--tg-theme-text-color, #000000)';
-            
-            option.addEventListener('click', () => {
-                selectedCarrier = carrier;
-                carrierInput.value = carrier.name_en;
-                carrierResults.style.display = 'none';
-            });
-            
-            option.addEventListener('mouseenter', () => {
-                option.style.backgroundColor = 'var(--tg-theme-hint-color, #707579)';
-            });
-            
-            option.addEventListener('mouseleave', () => {
-                option.style.backgroundColor = 'var(--tg-theme-secondary-bg-color, #f4f4f5)';
-            });
-            
-            carrierResults.appendChild(option);
-        });
-    });
-    
-    // Handle add
-    addButton.addEventListener('click', async () => {
-        const nameTagValue = nameTagInput.value.trim(); // Get the name tag value
-        const register_result = await handleAddTrackingNumber(
-            input.value, 
-            selectedCarrier?.key, 
-            nameTagValue || undefined
-        );
-        if (register_result === 2) {
-            // carrier not found, retry with carrier
-            carrierContainer.style.display = 'flex';
-            carrierInput.focus();
-            carrierResults.style.display = 'none';
-        }
-        closeModal();
-    });
     
     // Focus input when modal appears
     setTimeout(() => input.focus(), 100);
@@ -1329,7 +1338,8 @@ async function register_one_tracking_number(tracking_number: string, carrier?: n
             // user created, second response successful
         }
         if (prime_response.status > 520) {
-            return prime_response.status
+            console.log('prime_response.status', prime_response.status);
+            return prime_response.status;
         }  else if (prime_response.ok) {
             return 0
         } else if (!prime_response.ok) {
