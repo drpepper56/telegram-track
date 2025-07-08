@@ -1097,7 +1097,7 @@ function showAddTrackingDialog(): void {
             selectedCarrier?.key, 
             nameTagValue || undefined
         );
-        
+
         // 0 for registered, 
         // 1 for not registered,
         // 2 for not registered but retry with carrier
@@ -1307,6 +1307,8 @@ async function get_tracking_data(tracking_number: string): Promise<JSON | number
 /// Function to register a single tracking number, called from the popup element that opens on the main button
 async function register_one_tracking_number(tracking_number: string, carrier?: number): Promise<number | undefined> {
     // return 0 for OK, 1 for retry with carrier
+
+    console.log("registering...")
 
     // create the json to send as payload
     const prime_json_data = {
